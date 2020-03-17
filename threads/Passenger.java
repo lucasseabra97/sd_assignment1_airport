@@ -22,9 +22,9 @@ public class Passenger extends Thread {
 		return this.jorneyEnds;
 	}
 
-	public boolean getJorneyEnds() {
-		return this.jorneyEnds;
-	}
+	// public boolean getJorneyEnds() {
+	// 	return this.jorneyEnds;
+	// }
 
 	public void setJorneyEnds(boolean jorneyEnds) {
 		this.jorneyEnds = jorneyEnds;
@@ -51,10 +51,13 @@ public class Passenger extends Thread {
         while (true){
             switch(this.monitorAl.whatShouldIDO(this.bags,this.jorneyEnds)){
 				case goHome:
+					//System.out.printf("EXITING_THE_ARRIVAL_TERMINAL" + "passengerID=%d",this.passengerID);
 					this.state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 				case collecBag:
+					//System.out.printf("LUGGAGE_COLLECTION_POINT" + "passengerID=%d",this.passengerID);
 					state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
 				default :
+					//System.out.printf("ARRIVAL_TRANSFER_TERMINAL" + "passengerID=%d",this.passengerID);
 					state = PassengerEnum.AT_THE_ARRIVAL_TRANSFER_TERMINAL;
             }
         	try {

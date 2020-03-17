@@ -8,7 +8,7 @@ public class Porter extends Thread{
     private Baggage bag;
     private final IArraivalLoungePorter monitorAl;
     private final IBaggageCollectionPointPorter monitorBCP;
-
+    
     public Porter(IArraivalLoungePorter monitorAl,IBaggageCollectionPointPorter monitorBCP){
         this.monitorAl = monitorAl;
         this.monitorBCP = monitorBCP;
@@ -24,7 +24,7 @@ public class Porter extends Thread{
                     if (monitorAl.takeARest()) state = PorterEnum.AT_THE_PLANES_HOLD;
                     break;
                 case AT_THE_PLANES_HOLD:    
-                     System.out.println("Porter AT_THE_PLANES_HOLD");
+                    System.out.println("Porter AT_THE_PLANES_HOLD");
                     bag = monitorAl.tryToCollectABag();
                     if(bag == null || bag.getJourneyEnds())
                         state =PorterEnum.AT_THE_LUGGAGE_BELT_CONVEYOR ;
@@ -32,10 +32,15 @@ public class Porter extends Thread{
                         state =  PorterEnum.AT_THE_PLANES_HOLD;
                     break;
                 case AT_THE_LUGGAGE_BELT_CONVEYOR:
-                    if(bag!=null ){
-                        System.out.println("PORTER LOADING BAGGAGE"+ bag);
+                    if(bag == null) {
+                        System.out.println("No more bags to collect");
+                        monitorBCP.noMoreBagsToCollect();
+                    } else {
+                        System.out.println("PORTEIRO A CARREGAR MALA PARA A MESA: " + bag);
                         monitorBCP.carryItToAppropriateStore(bag);
                     }
+                    state = bag == null ? PorterEnum.WAITING_FOR_A_PLANE_TO_LAND : PorterEnum.AT_THE_PLANES_HOLD;
+                    break;
             }
             try {
                 Thread.sleep(1000);

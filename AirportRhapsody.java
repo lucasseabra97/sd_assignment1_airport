@@ -28,6 +28,7 @@ public class AirportRhapsody {
                 for(int b=0;b<nBags;b++){
                     //i => id
                     bags[b] = new Baggage(i,jorneyEnds);
+                    //System.out.println(bags[b]);
                 }
                 //array de bags é passado como argumento pq ajuda o porter a remove las
                 p[i] = new Passenger(i, bags, (IArraivalLoungePassenger)arraivalLounge, jorneyEnds);
@@ -35,14 +36,14 @@ public class AirportRhapsody {
                 System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));
             }
 
-            // try {
-            //     porter.join();
-            //     for(int i = 0; i < maxPassengers; i++) {
-            //         p[i].join();
-            //     }
-            // } catch (Exception e) {
+            try {
+                porter.join();
+                for(int i = 0; i < maxPassengers; i++) {
+                    p[i].join();
+                }
+            } catch (Exception e) {
     
-            // }
+            }
     }
 }
    

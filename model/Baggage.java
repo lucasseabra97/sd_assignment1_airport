@@ -12,6 +12,8 @@ public class Baggage
 	}
 
 
+
+
 	public int getPassengerID() {
 		return this.passengerID;
 	}
@@ -31,7 +33,7 @@ public class Baggage
 	public void setJourneyEnds(boolean journeyEnds) {
 		this.journeyEnds = journeyEnds;
 	}
-
+	
 
 	@Override
 	public String toString() {

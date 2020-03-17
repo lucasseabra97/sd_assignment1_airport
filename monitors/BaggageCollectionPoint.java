@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import interfaces.*;
 
 import java.util.concurrent.locks.Condition;
-public class BaggageCollectionPoint implements IBaggageCollectionPointPorter {
+public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IBaggageCollectionPointPassenger{
     private final ReentrantLock rl;
     private final Condition waitingBag;
     private List<Baggage> bags;
@@ -30,6 +30,21 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter {
             }
         }catch(Exception ex){
         }finally{
+            rl.unlock();
+        }
+    }
+    @Override
+    public Baggage goCollectABag(int idx) {
+        rl.lock();
+        try {
+            waitingBag.await();
+            if(idx >= this.bags.size()) {
+                return null;
+            }
+            return this.bags.get(idx);
+        } catch(Exception ex) {
+            return null;
+        } finally {
             rl.unlock();
         }
     }

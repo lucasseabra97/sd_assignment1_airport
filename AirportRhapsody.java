@@ -3,6 +3,7 @@ import java.lang.management.MonitorInfo;
 import java.util.Random;
 
 import interfaces.IArraivalLoungePassenger;
+import interfaces.IBaggageCollectionPointPassenger;
 import threads.*;
 import monitors.*;
 import model.*;
@@ -31,7 +32,7 @@ public class AirportRhapsody {
                     //System.out.println(bags[b]);
                 }
                 //array de bags é passado como argumento pq ajuda o porter a remove las
-                p[i] = new Passenger(i, bags, (IArraivalLoungePassenger)arraivalLounge, jorneyEnds);
+                p[i] = new Passenger(i, bags, (IArraivalLoungePassenger)arraivalLounge,(IBaggageCollectionPointPassenger)baggageCollectionPoint,jorneyEnds);
                 p[i].start();
                 System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));
             }

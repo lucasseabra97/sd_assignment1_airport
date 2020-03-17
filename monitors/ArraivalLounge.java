@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter{
 	private final ReentrantLock rl;
-	private final ArrayList<Baggage> memBag = new ArrayList<Baggage>();
+	private ArrayList<Baggage> memBag = new ArrayList<Baggage>();
 	private final Condition cPorter;
 	private int nPassengers=0;
 	private int maxPassengers;
@@ -62,6 +62,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	@Override
 	public Baggage tryToCollectABag(){
 		if(memBag.size() > 0) {
+			System.out.println(memBag.size());
             return memBag.remove(0);
         }
         return null;

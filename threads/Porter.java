@@ -17,12 +17,13 @@ public class Porter extends Thread{
 
     @Override
     public void run() { 
-        while(true){
+        loop : while(true){
             switch(state){
                 case WAITING_FOR_A_PLANE_TO_LAND:
                     System.out.println("Porter waiting for a plain to land...");
                     if (monitorAl.takeARest()) state = PorterEnum.AT_THE_PLANES_HOLD;
-                    break;
+                    else break loop;
+                break;
                 case AT_THE_PLANES_HOLD:    
                     System.out.println("Porter AT_THE_PLANES_HOLD");
                     bag = monitorAl.tryToCollectABag();
@@ -32,6 +33,7 @@ public class Porter extends Thread{
                         state =  PorterEnum.AT_THE_PLANES_HOLD;
                     break;
                 case AT_THE_LUGGAGE_BELT_CONVEYOR:
+                    System.out.println("AT_THE_LUGGAGE_BELT_CONVEYOR"+bag.getPassengerID());
                     if(bag == null) {
                         System.out.println("No more bags to collect");
                         monitorBCP.noMoreBagsToCollect();

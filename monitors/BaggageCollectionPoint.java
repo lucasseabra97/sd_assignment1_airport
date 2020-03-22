@@ -20,6 +20,9 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
         waitingBag = rl.newCondition();
         bags = new ArrayList<>();
     }
+
+    //para sinalizar os passageiros que ja nao ha malas, ou para irem ver 
+    //se a mala que ele acabou de por e deles
     @Override
 	public void carryItToAppropriateStore(Baggage bag) {
         rl.lock();
@@ -41,6 +44,7 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
             if(idx >= this.bags.size()) {
                 return null;
             }
+
             return this.bags.get(idx);
         } catch(Exception ex) {
             return null;
@@ -48,6 +52,7 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
             rl.unlock();
         }
     }
+
     
     @Override
     public void noMoreBagsToCollect() {
@@ -59,4 +64,5 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
             rl.unlock();
         }
     }
+    
 }

@@ -11,9 +11,6 @@ public class Baggage
 		this.journeyEnds = journeyEnds;
 	}
 
-
-
-
 	public int getPassengerID() {
 		return this.passengerID;
 	}

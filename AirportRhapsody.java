@@ -1,9 +1,7 @@
 
 import java.lang.management.MonitorInfo;
 import java.util.Random;
-
-import interfaces.IArraivalLoungePassenger;
-import interfaces.IBaggageCollectionPointPassenger;
+import interfaces.*;
 import threads.*;
 import monitors.*;
 import model.*;
@@ -12,10 +10,14 @@ public class AirportRhapsody {
             System.out.println("----------AirportRhapsody---------");
             final Random random = new Random();
             final int maxPassengers = 6;
+            final int busSize = 3;
             Baggage [] bags = null;
             Passenger p[] = new Passenger[maxPassengers];
             ArraivalLounge arraivalLounge = new ArraivalLounge(maxPassengers);
             BaggageCollectionPoint baggageCollectionPoint = new BaggageCollectionPoint();
+            ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(maxPassengers);
+            ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(busSize);
+
             Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
             porter.start();
             for(int i=0;i<maxPassengers;i++){
@@ -32,9 +34,13 @@ public class AirportRhapsody {
                     //System.out.println(bags[b]);
                 }
                 //array de bags é passado como argumento pq ajuda o porter a remove las
-                p[i] = new Passenger(i, bags, (IArraivalLoungePassenger)arraivalLounge,(IBaggageCollectionPointPassenger)baggageCollectionPoint,jorneyEnds);
+                p[i] = new Passenger(i, bags,(IArraivalLoungePassenger)arraivalLounge,
+                        (IBaggageCollectionPointPassenger)baggageCollectionPoint,
+                        (IArraivalTerminalExitPassenger)arraivalTerminalExit,
+                        (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay,
+                        jorneyEnds);
                 p[i].start();
-                System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));
+              //  System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));
             }
 
             try {

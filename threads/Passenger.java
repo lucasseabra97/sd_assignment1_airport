@@ -1,7 +1,6 @@
 package threads;
 
 import model.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,13 +11,15 @@ public class Passenger extends Thread {
 	private final IArraivalLoungePassenger monitorAl;
 	private final IBaggageCollectionPointPassenger monitorBc;
 	private boolean jorneyEnds;
+	private final IArraivalTerminalExitPassenger monitorAe;
+	private final IArraivalTerminalTransferQPassenger monitorTTQ;
 	private Baggage[] bags;
 	private List<Baggage> bagsCollected;
 	private int passengerID;
 	private int nbags;
 
-	
-	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc,boolean jorneyEnds) {
+	// Monitors(interfaces) are passed as arguments
+	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ, boolean jorneyEnds ) {
 		this.passengerID = passengerID;
 		this.bags = bags;
 		this.jorneyEnds = jorneyEnds;
@@ -27,6 +28,8 @@ public class Passenger extends Thread {
 		this.state = PassengerEnum.AT_THE_DISEMBARKING_ZONE;	
 		this.nbags = 0;
 		this.bagsCollected = new ArrayList<Baggage>();
+		this.monitorAe = monitorAe;
+		this.monitorTTQ = monitorTTQ;
 	}
 
 	public boolean isJorneyEnds() {
@@ -62,18 +65,23 @@ public class Passenger extends Thread {
         loop :while (true){
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:
-					System.out.printf("Passenger waiting AT_THE_DISEMBARKING_ZONE with : %d",bags.length);
-					if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.goHome)
+					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags \n",this.passengerID,bags.length);
+					if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.goHome){
 						state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
-					else if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.collecBag)
+					}	
+					else if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.collecBag){
 						state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
-					else if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.takeABus)
+					}	
+					else{
 						state = PassengerEnum.AT_THE_ARRIVAL_TRANSFER_TERMINAL;
+					}
+					// else if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.takeABus)
+						
 					break;
 				case AT_THE_LUGGAGE_COLLECTION_POINT:
 					//Enquanto o passageiro tem malas entao vai busca las, no caso de as mesmas nao estarem no collectPoint
 					// entao vai para o ReclaimOffice  
-					System.out.printf("Passenger at LUGGAGE_COLLECTION_POINT" + "passengerID=%d bags=%d",this.passengerID , this.bags);
+					System.out.printf("Passenger:%d -> LUGGAGE_COLLECTION_POINT" + "bags=%d \n",this.passengerID , this.bags.length);
 					int idx =0;
 					// passa de array para arraylist. implementaçao mais facil...
 					bagsCollected = Arrays.asList(bags); 
@@ -86,7 +94,6 @@ public class Passenger extends Thread {
 								state = PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE;
 							else
 								state = PassengerEnum.AT_THE_ARRIVAL_TRANSFER_TERMINAL;
-
 						}
 						if(bagsCollected.contains(baggtoCollect))
 						{
@@ -95,25 +102,35 @@ public class Passenger extends Thread {
 								state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 						
 						}
-						else{
-							// bag nao tem o idx do passenger , tem de devolver ? // criar função BaggageCollectionPoint para devolver a mala caso não seja dele
-						}		
 						idx ++;
 						
 					}
 					state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
 					break;
 				case AT_THE_ARRIVAL_TRANSFER_TERMINAL:
+					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL|\n",this.passengerID);
+					monitorTTQ.takeABus();
+					monitorTTQ.enterTheBus();
+					System.out.printf("Passenger:%d -> AT THE TERMINAL TRANSFER|\n",this.passengerID);
+					state = PassengerEnum.TERMINAL_TRANSFER;
+					break;
+				case TERMINAL_TRANSFER:
+					
 
+					state = PassengerEnum.AT_THE_DEPARTURE_TRANSFER_TERMINAL;
+					break;
+
+				case AT_THE_DEPARTURE_TRANSFER_TERMINAL:
 					
 					break;
 				case ENTERING_THE_DEPARTURE_TERMINAL:
-					
+					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT",this.passengerID);
+					monitorAe.prepareNextLeg();
 					break loop;
 				case EXITING_THE_ARRIVAL_TERMINAL:
-					System.out.printf("EXITING_THE_ARRIVAL_TERMINAL" + "passengerID=%d",this.passengerID);
+					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL",this.passengerID);
 					this.state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
-				
+					monitorAe.goHome();
 					break loop;
 				default :
 					//System.out.printf("ARRIVAL_TRANSFER_TERMINAL" + "passengerID=%d",this.passengerID);

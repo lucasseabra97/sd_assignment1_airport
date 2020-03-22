@@ -33,7 +33,7 @@ public class Porter extends Thread{
                         state =  PorterEnum.AT_THE_PLANES_HOLD;
                     break;
                 case AT_THE_LUGGAGE_BELT_CONVEYOR:
-                    System.out.println("AT_THE_LUGGAGE_BELT_CONVEYOR"+bag.getPassengerID());
+                    System.out.println("AT_THE_LUGGAGE_BELT_CONVEYOR");
                     if(bag == null) {
                         System.out.println("No more bags to collect");
                         monitorBCP.noMoreBagsToCollect();

@@ -1,6 +1,6 @@
 package model;
 
-public  enum PassengerAction{
+public enum PassengerAction{
     goHome,
     collecBag,
     takeABus

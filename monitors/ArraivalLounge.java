@@ -9,15 +9,16 @@ import java.util.Random;
 
 public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter{
 	private final ReentrantLock rl;
-	private ArrayList<Baggage> memBag = new ArrayList<Baggage>();
+	private ArrayList<Baggage> memBag;
 	private final Condition cPorter;
 	private int nPassengers=0;
 	private int maxPassengers;
 	private boolean collectBaggs; 
-	private final Random random = new Random();
+	//private final Random random = new Random();
 
 	public ArraivalLounge(int maxPassengers) {
 		this.maxPassengers = maxPassengers;
+		this.memBag = new ArrayList<Baggage>();
 		rl = new ReentrantLock(true);
 		collectBaggs = false;
 		cPorter = rl.newCondition();
@@ -26,13 +27,17 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	public PassengerAction whatShouldIDO(Baggage[] bags,boolean jorneyEnds) {
 		rl.lock();
         try {
+			//Thread.sleep(100);
 			for(int i=0;i<bags.length;i++){
+				System.out.println(bags[i]);
 				this.memBag.add(bags[i]);
-			}
+			}			
 			nPassengers++;
 			if(nPassengers == maxPassengers){
+				//System.out.printf("total bags = %d \n",this.memBag.size());
+				//System.out.println(nPassengers);
 				collectBaggs=true;
-				nPassengers = 0;
+		
 				cPorter.signal();		
 			}
         } catch (Exception ex) {}
@@ -62,7 +67,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	@Override
 	public Baggage tryToCollectABag(){
 		if(memBag.size() > 0) {
-			System.out.println(memBag.size());
+			//System.out.println(memBag.size());
             return memBag.remove(0);
         }
         return null;

@@ -2,5 +2,6 @@ package model;
 
 public enum BusDriverAction{
     stayParked,
-    goToDepartureTerminal
+    goToDepartureTerminal,
+    dayEnded
 }

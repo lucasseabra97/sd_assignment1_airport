@@ -108,15 +108,15 @@ public class Passenger extends Thread {
 					state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
 					break;
 				case AT_THE_ARRIVAL_TRANSFER_TERMINAL:
-					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL|\n",this.passengerID);
-					monitorTTQ.takeABus();
+					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL| ",this.passengerID);
+					monitorTTQ.takeABus(this);
 					monitorTTQ.enterTheBus();
-					System.out.printf("Passenger:%d -> AT THE TERMINAL TRANSFER|\n",this.passengerID);
+					System.out.printf("Passenger:%d -> AT THE TERMINAL TRANSFER| ",this.passengerID);
 					state = PassengerEnum.TERMINAL_TRANSFER;
 					break;
 				case TERMINAL_TRANSFER:
 					
-
+					//waitRide(this)
 					state = PassengerEnum.AT_THE_DEPARTURE_TRANSFER_TERMINAL;
 					break;
 

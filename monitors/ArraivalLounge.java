@@ -29,7 +29,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
         try {
 			//Thread.sleep(100);
 			for(int i=0;i<bags.length;i++){
-				System.out.println(bags[i]);
+				//System.out.println(bags[i]);
 				this.memBag.add(bags[i]);
 			}			
 			nPassengers++;

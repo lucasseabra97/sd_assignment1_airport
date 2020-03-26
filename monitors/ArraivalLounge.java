@@ -25,20 +25,21 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	}
 	@Override
 	public PassengerAction whatShouldIDO(Baggage[] bags,boolean jorneyEnds) {
-		rl.lock();
+		
         try {
+			rl.lock();
 			//Thread.sleep(100);
 			for(int i=0;i<bags.length;i++){
-				//System.out.println(bags[i]);
+				System.out.println(bags[i]);
 				this.memBag.add(bags[i]);
 			}			
 			nPassengers++;
 			if(nPassengers == maxPassengers){
-				//System.out.printf("total bags = %d \n",this.memBag.size());
+				System.out.printf("total bags = %d \n",this.memBag.size());
 				//System.out.println(nPassengers);
 				collectBaggs=true;
-		
-				cPorter.signal();		
+				cPorter.signal();	
+				nPassengers =0;	
 			}
         } catch (Exception ex) {}
         finally {
@@ -67,7 +68,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	@Override
 	public Baggage tryToCollectABag(){
 		if(memBag.size() > 0) {
-			//System.out.println(memBag.size());
+			System.out.println(memBag.size());
             return memBag.remove(0);
         }
         return null;

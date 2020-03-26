@@ -9,24 +9,22 @@ import interfaces.*;
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{
     private final ReentrantLock rl;
-    private final Queue<Passenger> waitingForBus = new LinkedList<>();
+    private final Queue<Passenger> waitingForBus; 
+    private final Queue<Passenger> enterInBus;
     private int busSize;
-    private int passengersIn;
-    private int passengersLeftTogo;
     private final Condition cBusDriver; //variavel de condiçao para acordar o busdriver
-    private final Condition waitingAnnouncment;//variavel de condiçao para acordar o passageiro qd o bus chega
+    //private final Condition waitingAnnouncment;//variavel de condiçao para acordar o passageiro qd o bus chega
     private final Condition cPassWaitingToEnter; //variavel de condiçao para acordar o passageir->mimica
+    private final Condition busIsFull; //3 passenger wakes up the busDriver to go to Departure
     public ArraivalTerminalTransferQuay(int busSize){
         rl = new ReentrantLock(true);
         this.busSize=busSize;
         this.waitingAnnouncment = rl.newCondition();
-        this.cBusDriver = rl.newCondition();;
+        this.cBusDriver = rl.newCondition();
         this.cPassWaitingToEnter = rl.newCondition();
-        
+        waitingForBus = new LinkedList<>();
+        enterBus = new enterBus<>();
     }
-
-
-
 
     @Override
     public void takeABus(Passenger p){
@@ -34,26 +32,15 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         //who arrives at the transfer terminal and finds out her place in the waiting queue
         // equals the bus capacity, or when the departure time has been reached
         rl.lock();
-        try{
-            //nPassWaiting++;
+        try{ 
             waitingForBus.add(p);
-            cPassWaitingToEnter.await();
-
-            // while(waitingForBus.size()>busSize){
-            //     
-            // }
+            while(waitingForBus.size()>=busSize){
+                cPassWaitingToEnter.await();
+            }
             //se ha 3 passageiros entao embarcam
-            
-            // if(waitingForBus.size()==busSize){
-            //     cBusDriver.signal();
-            //     cPassWaitingToEnter.await();
-            // }
-            //se ha 2 ou menos passageiros para embarcar entao mete os no autocarro 
-            // if(waitingForBus.size() <busSize){
-            
-
-            //waitingAnnouncment()
-            // }
+            if(waitingForBus.size()==busSize){
+                cBusDriver.signal();
+            }
             
         }catch(Exception ex){}
         finally {
@@ -67,24 +54,13 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         //autocarro, entra e senta-se num lugar disponível para efectuar a viagem de transferência 
         rl.lock();
         try{
-            while(waitingForBus.size()>busSize){
-                cPassWaitingToEnter.await(); 
-            }
-            //se ha 3 passageiros entao embarcam
-            
-            if(waitingForBus.size()==busSize){
-                cBusDriver.signalAll();
-                passengersIn=3;
-                cPassWaitingToEnter.await();
-            }
-            //se ha 2 ou menos passageiros para embarcar entao mete os no autocarro 
-            if(waitingForBus.size() <busSize){
-                
-            }
-            passengersIn++;
-            waitingForBus.remove();
-            //se ja entraram 3 e eram 5 na queue faltam 2 para enbarcar
-            passengersLeftTogo = waitingForBus.size() - passengersIn; 
+            //sai da fila de espera para entrar no bus
+           Passenger p  = waitingForBus.remove();
+           while(enterInBus.size()<= busSize){
+              enterInBus.add(p);
+           }
+           busisFull.signal();// sinaliza o busDriver que já está cheio e podem ir para o departure
+
         }catch(Exception ex){}
         finally {
             rl.unlock();
@@ -92,26 +68,34 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     }
     @Override
     public BusDriverAction hasDaysWorkEnded(){
-        if(waitingForBus.size()>0){
-            if(passengersIn == busSize){
-               return BusDriverAction.goToDepartureTerminal;
+        rl.lock();
+        try {
+            if (waitingForBus.size() >0)
+                
+            busIsFull.await();
+            if(waitingForBus.size()>0){
+                if(enterInBus.size() == busSize){
+                    return BusDriverAction.goToDepartureTerminal;
+                }
             }
-            //falta aqui qlq coisa
+            
+        } catch (Exception e) {}
+        finally{
+            rl.unlock();
         }
-        return null;
+      
     }
     @Override
     public boolean annoucingBusBoarding() {
 		rl.lock();
 		try {
             System.out.println("BUS AS ARRIVED AND WAITING FOR PASSENGERS TO ENTER");
-            //LIMPAR QUEUE
-            waitingAnnouncment.signalAll();  
-			// waitAnnouncement.signalAll();
-			// waitEnter.await();
-			// passengers = passengers - passengersInside;
+            //podem vir para o bus
+            cPassWaitingToEnter.signalAll();  
+            //LIMPAR QUEUe porque nao ha forma de tirar passageiros no departure terminal
+            enterInBus.clear();
             return true;
-			// return passengersInside;
+			
 		} catch (Exception ex) {
 			return true;
 		} finally {

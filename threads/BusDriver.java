@@ -8,7 +8,7 @@ public class BusDriver extends Thread{
     private BusDriverEnum state;
     private final IArraivalTerminalTransferQBusDriver terminalTQBusDriver;
     private final IDepartureTerminalTransferQBusDriver departureTerminalQBusDriver;
-
+   
     public BusDriver(IArraivalTerminalTransferQBusDriver terminalTQBusDriver,IDepartureTerminalTransferQBusDriver departureTerminalQBusDriver){
         this.state = state.PARKING_AT_THE_ARRIVAL_TERMINAL;
         this.terminalTQBusDriver = terminalTQBusDriver;
@@ -27,7 +27,7 @@ public class BusDriver extends Thread{
                     {
                         if(terminalTQBusDriver.annoucingBusBoarding()){
                             System.out.println("Starting jouney to terminal Transfer");
-                            state= BusDriverEnum.DRIVING_FORWARD;
+                            state = BusDriverEnum.DRIVING_FORWARD;
                         }
                         else if (busState == BusDriverAction.dayEnded){
                             break loop;
@@ -37,7 +37,19 @@ public class BusDriver extends Thread{
                     }
                 case DRIVING_FORWARD:
                     System.out.println("BUSDRIVER driving Forward");
-
+                    state = BusDriverEnum.PARKING_AT_THE_DEPARTURE_TERMINAL;
+                    break;
+                case PARKING_AT_THE_DEPARTURE_TERMINAL:
+                    System.out.println("BUS DRIVER AT THE DEPARTURE TERMINAL");
+                    departureTerminalQBusDriver.parkTheBusAndLetPassOff();
+                    System.out.println("PASSAGEIROS SAIRAM DO AUTOCARRO, A COMEÇAR VIAGEM DE VOLTA");
+                    state = BusDriverEnum.DRIVING_BACKWARD;
+                    break;
+            
+                case DRIVING_BACKWARD:
+                    System.out.println("BUS DRIVER GOING BACKWARD");
+                    state = BusDriverEnum.PARKING_AT_THE_ARRIVAL_TERMINAL;
+                    break;
 
 
             }
@@ -47,89 +59,3 @@ public class BusDriver extends Thread{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// @Override
-//     public void run(){
-
-//         while(loop){
-//             char choice = arrivalTermTransfQuay.hasDaysWorkEnded();
-
-//             if(choice == 'W') {
-//                 nPassengers = arrivalTermTransfQuay.annoucingBusBoarding();			
-//                 goToDepartureTerminal();
-//                 state = BusDriverState.PARKING_AT_THE_DEPARTURE_TERMINAL;
-//                 departureTermTransfQuay.parkTheBusAndLetPassengerOff(nPassengers);
-//                 goToArrivalTerminal();
-//                 state = BusDriverState.PARKING_AT_THE_ARRIVAL_TERMINAL;
-//                 arrivalTermTransfQuay.parkTheBus();
-//             }else if(choice == 'E'){
-//                 loop = false;
-//             }
-//         }
-//     }
-
-    
-//     /** 
-//      * @param state
-//      */
-//     public void setState(BusDriverState state) {
-//         this.state = state;
-//     }
-    
-//     /** 
-//      * @return BusDriverState
-//      */
-//     public BusDriverState getBDriverState() {
-//         return this.state;
-//     }
-
-//     void goToDepartureTerminal(){
-//         try {
-//             state = BusDriverState.DRIVING_FORWARD; 
-//             Thread.sleep(50);
-//         } catch (Exception e) {}
-
-//     }
-//     void goToArrivalTerminal(){
-//         try {
-//             state = BusDriverState.DRIVING_FORWARD; 
-//             Thread.sleep(50);
-//         } catch (Exception e) {}
-
-//     }

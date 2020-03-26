@@ -13,13 +13,14 @@ public class Passenger extends Thread {
 	private boolean jorneyEnds;
 	private final IArraivalTerminalExitPassenger monitorAe;
 	private final IArraivalTerminalTransferQPassenger monitorTTQ;
+	private final IDepartureTerminalTransferQPassenger monitorDTTQ;
 	private Baggage[] bags;
 	private List<Baggage> bagsCollected;
 	private int passengerID;
 	private int nbags;
 
 	// Monitors(interfaces) are passed as arguments
-	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ, boolean jorneyEnds ) {
+	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, boolean jorneyEnds ) {
 		this.passengerID = passengerID;
 		this.bags = bags;
 		this.jorneyEnds = jorneyEnds;
@@ -30,6 +31,7 @@ public class Passenger extends Thread {
 		this.bagsCollected = new ArrayList<Baggage>();
 		this.monitorAe = monitorAe;
 		this.monitorTTQ = monitorTTQ;
+		this.monitorDTTQ = monitorDTTQ;
 	}
 
 	public boolean isJorneyEnds() {
@@ -66,10 +68,11 @@ public class Passenger extends Thread {
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:
 					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags \n",this.passengerID,bags.length);
-					if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.goHome){
+					PassengerAction action = this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds);
+					if(action == PassengerAction.goHome){
 						state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 					}	
-					else if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.collecBag){
+					else if(action == PassengerAction.collecBag){
 						state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
 					}	
 					else{
@@ -102,33 +105,33 @@ public class Passenger extends Thread {
 								state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 						
 						}
-						idx ++;
-						
+						idx ++;	
 					}
-					state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
 					break;
 				case AT_THE_ARRIVAL_TRANSFER_TERMINAL:
-					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL| ",this.passengerID);
+					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL WATING FOR BUS \n",this.passengerID);
 					monitorTTQ.takeABus(this);
 					monitorTTQ.enterTheBus();
-					System.out.printf("Passenger:%d -> AT THE TERMINAL TRANSFER| ",this.passengerID);
+					System.out.printf("Passenger:%d -> IN THE BUS \n",this.passengerID);
 					state = PassengerEnum.TERMINAL_TRANSFER;
 					break;
 				case TERMINAL_TRANSFER:
 					
-					//waitRide(this)
+					monitorDTTQ.waitRide();
 					state = PassengerEnum.AT_THE_DEPARTURE_TRANSFER_TERMINAL;
 					break;
 
 				case AT_THE_DEPARTURE_TRANSFER_TERMINAL:
-					
+				System.out.printf("Passenger:%d -> LEVING THE BUS \n",this.passengerID);
+					monitorDTTQ.leaveTheBus();
+					state = PassengerEnum.ENTERING_THE_DEPARTURE_TERMINAL;
 					break;
 				case ENTERING_THE_DEPARTURE_TERMINAL:
-					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT",this.passengerID);
+					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT \n",this.passengerID);
 					monitorAe.prepareNextLeg();
 					break loop;
 				case EXITING_THE_ARRIVAL_TERMINAL:
-					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL",this.passengerID);
+					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL \n",this.passengerID);
 					this.state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 					monitorAe.goHome();
 					break loop;
@@ -137,7 +140,7 @@ public class Passenger extends Thread {
 					
             }
         	try {
-                Thread.sleep(1000);
+                Thread.sleep(5);
 			} catch (Exception e) {}
 			
         }

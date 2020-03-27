@@ -13,7 +13,6 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     private final ReentrantLock rl;
     private final Queue<Passenger> waitingForBus; 
     private final Queue<Passenger> enterInBus;
-    
     private int busSize = 0;
     private final Condition cBusDriver; //variavel de condiçao para acordar o busdriver
     //private final Condition waitingAnnouncment;//variavel de condiçao para acordar o passageiro qd o bus chega
@@ -29,20 +28,28 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         enterInBus = new LinkedList<>();
     }
 
+    // public void departureTime(timeout) {
+        
+    //     cBusDriver.signal();
+        
+    // }
+
     @Override
     public void takeABus(Passenger p){
         //the driver is waken up the first time by the operation takeABus of the passenger 
         //who arrives at the transfer terminal and finds out her place in the waiting queue
         // equals the bus capacity, or when the departure time has been reached
         rl.lock();
-        try{ 
+        try{  
+            //before blocking the 3 guy wakes up the BD
             waitingForBus.add(p);
-            while(waitingForBus.size()>=busSize){
-                cPassWaitingToEnter.await();
-            }
+            if(waitingForBus.size()>=busSize)
+                cPassWaitingToEnter.await(); 
             //se ha 3 passageiros entao embarcam
             if(waitingForBus.size()==busSize){
-                cBusDriver.signal();
+                System.out.println("Passenger waiting for bus"+p.toString());
+                cBusDriver.signal();//acorda o BD mas adormece a seguir à espera do sinal do BD para os 3 entrarem
+      
             }
             
         }catch(Exception ex){}
@@ -57,13 +64,17 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         //autocarro, entra e senta-se num lugar disponível para efectuar a viagem de transferência 
         rl.lock();
         try{
+            
             //sai da fila de espera para entrar no bus
-           Passenger p  = waitingForBus.remove();
-           while(enterInBus.size()<= busSize){
-              enterInBus.add(p);
+           
+           if(enterInBus.size()< busSize){
+              enterInBus.add(waitingForBus.remove());
            }
-           busIsFull.signal();// sinaliza o busDriver que já está cheio e podem ir para o departure
-
+           if (enterInBus.size() == busSize ){
+                System.out.println("Passenger signal aqvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvui");
+                busIsFull.signal();// sinaliza o busDriver que já está cheio e podem ir para o departure
+           }
+           
         }catch(Exception ex){}
         finally {
             rl.unlock();
@@ -73,12 +84,16 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public BusDriverAction hasDaysWorkEnded(){
         rl.lock();
         try {
-        
-            if(waitingForBus.size()>0){
-                if(enterInBus.size() == busSize){
-                    return BusDriverAction.goToDepartureTerminal;
-                }
+            busIsFull.await();
+            System.out.println("bus queue in size: "+ enterInBus.size());
+            
+            if(enterInBus.size() == busSize ){
+                System.out.println("Bus driving goging foward: "+enterInBus.size());
+                return BusDriverAction.goToDepartureTerminal;
+                
             }
+           
+            System.out.println("Bus driver waiting for bus full");
             return BusDriverAction.stayParked;
         
                        
@@ -93,8 +108,9 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
 		rl.lock();
 		try {
             System.out.println("BUS AS ARRIVED AND WAITING FOR PASSENGERS TO ENTER");
+            cPassWaitingToEnter.signalAll();
             //podem vir para o bus
-            cPassWaitingToEnter.signalAll();  
+            
             //LIMPAR QUEUe porque nao ha forma de tirar passageiros no departure terminal
             enterInBus.clear();
             return true;

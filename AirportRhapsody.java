@@ -21,6 +21,8 @@ public class AirportRhapsody {
     
         Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
         porter.start();
+        BusDriver busdriver = new BusDriver(arraivalTerminalTransferQuay , departureTerminalTransferQuay);
+        busdriver.start();
         for(int i=0;i<maxPassengers;i++){
                 //random nbags gerados para cada passageiro 
             int nBags = random.nextInt(3);
@@ -46,6 +48,7 @@ public class AirportRhapsody {
 
         try {
             porter.join();
+            busdriver.join();
             for(int i = 0; i < maxPassengers; i++) {
                 p[i].join();
             }

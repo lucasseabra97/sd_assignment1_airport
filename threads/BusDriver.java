@@ -25,16 +25,20 @@ public class BusDriver extends Thread{
                     BusDriverAction busState = terminalTQBusDriver.hasDaysWorkEnded();  
                     if(busState == BusDriverAction.stayParked)
                     {
-                        if(terminalTQBusDriver.annoucingBusBoarding()){
-                            System.out.println("Starting jouney to terminal Transfer");
-                            state = BusDriverEnum.DRIVING_FORWARD;
-                        }
-                        else if (busState == BusDriverAction.dayEnded){
-                            break loop;
-                        }
-                    else
-                        break;      
+                        System.out.println("Bus driver parked");
+                        state = BusDriverEnum.PARKING_AT_THE_ARRIVAL_TERMINAL;    
                     }
+                    else if (busState == BusDriverAction.goToDepartureTerminal){
+                        System.out.println("Starting jouney to terminal Transfer");
+                        terminalTQBusDriver.annoucingBusBoarding();
+                        state = BusDriverEnum.DRIVING_FORWARD;
+                        
+                    }    
+                   
+                    else if (busState == BusDriverAction.dayEnded){
+                        break loop;    
+                    }
+                    break;
                 case DRIVING_FORWARD:
                     System.out.println("BUSDRIVER driving Forward");
                     state = BusDriverEnum.PARKING_AT_THE_DEPARTURE_TERMINAL;

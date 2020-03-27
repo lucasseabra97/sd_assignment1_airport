@@ -37,23 +37,27 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
         rl.lock();
         try { 
             nPassengers --;
-            if(nPassengers == 0)
+            if(nPassengers == 0){
                 passengersOut.signal();
+                System.out.println("Wake up bus to go backward");
+            }
+                
+
         } catch (Exception e) {}
     
         finally{
-
+            rl.unlock();
         }
     
-    }
-    
-    
+    }  
     @Override
     public void parkTheBusAndLetPassOff() {
         rl.lock();
         try {
+            System.out.println("Bus parked and let off");
             waitingRide.signalAll();
             passengersOut.await();
+            System.out.println("Bus going backward");
         } catch(Exception ex) {}
         finally {
             rl.unlock();

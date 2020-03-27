@@ -67,7 +67,7 @@ public class Passenger extends Thread {
         loop :while (true){
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:
-					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags \n",this.passengerID,bags.length);
+					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags and jouneyEnds:%b \n",this.passengerID,bags.length,this.jorneyEnds);
 					PassengerAction action = this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds);
 					if(action == PassengerAction.goHome){
 						state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
@@ -116,7 +116,7 @@ public class Passenger extends Thread {
 					state = PassengerEnum.TERMINAL_TRANSFER;
 					break;
 				case TERMINAL_TRANSFER:
-					
+					System.out.printf("Passenger:%d -> AT THE TERMINAL TRANSFER \n",this.passengerID);
 					monitorDTTQ.waitRide();
 					state = PassengerEnum.AT_THE_DEPARTURE_TRANSFER_TERMINAL;
 					break;

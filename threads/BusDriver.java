@@ -32,7 +32,7 @@ public class BusDriver extends Thread{
                         else if (busState == BusDriverAction.dayEnded){
                             break loop;
                         }
-
+                    else
                         break;      
                     }
                 case DRIVING_FORWARD:

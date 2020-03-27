@@ -3,6 +3,8 @@ package monitors;
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+
 import model.*;
 import threads.Passenger;
 import interfaces.*;
@@ -11,7 +13,8 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     private final ReentrantLock rl;
     private final Queue<Passenger> waitingForBus; 
     private final Queue<Passenger> enterInBus;
-    private int busSize;
+    
+    private int busSize = 0;
     private final Condition cBusDriver; //variavel de condiçao para acordar o busdriver
     //private final Condition waitingAnnouncment;//variavel de condiçao para acordar o passageiro qd o bus chega
     private final Condition cPassWaitingToEnter; //variavel de condiçao para acordar o passageir->mimica
@@ -19,11 +22,11 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public ArraivalTerminalTransferQuay(int busSize){
         rl = new ReentrantLock(true);
         this.busSize=busSize;
-        this.waitingAnnouncment = rl.newCondition();
+        this.busIsFull = rl.newCondition();
         this.cBusDriver = rl.newCondition();
         this.cPassWaitingToEnter = rl.newCondition();
         waitingForBus = new LinkedList<>();
-        enterBus = new enterBus<>();
+        enterInBus = new LinkedList<>();
     }
 
     @Override
@@ -59,7 +62,7 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
            while(enterInBus.size()<= busSize){
               enterInBus.add(p);
            }
-           busisFull.signal();// sinaliza o busDriver que já está cheio e podem ir para o departure
+           busIsFull.signal();// sinaliza o busDriver que já está cheio e podem ir para o departure
 
         }catch(Exception ex){}
         finally {
@@ -70,16 +73,16 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public BusDriverAction hasDaysWorkEnded(){
         rl.lock();
         try {
-            if (waitingForBus.size() >0)
-                
-            busIsFull.await();
+        
             if(waitingForBus.size()>0){
                 if(enterInBus.size() == busSize){
                     return BusDriverAction.goToDepartureTerminal;
                 }
             }
-            
-        } catch (Exception e) {}
+            return BusDriverAction.stayParked;
+        
+                       
+        } catch (Exception e) {return BusDriverAction.stayParked;}
         finally{
             rl.unlock();
         }

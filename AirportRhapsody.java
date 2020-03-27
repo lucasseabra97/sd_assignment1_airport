@@ -17,7 +17,8 @@ public class AirportRhapsody {
         BaggageCollectionPoint baggageCollectionPoint = new BaggageCollectionPoint();
         ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(maxPassengers);
         ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(busSize);
-
+        DepartureTerminalTransferQuay departureTerminalTransferQuay = new DepartureTerminalTransferQuay();
+    
         Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
         porter.start();
         for(int i=0;i<maxPassengers;i++){
@@ -37,7 +38,7 @@ public class AirportRhapsody {
             p[i] = new Passenger(i, bags,(IArraivalLoungePassenger)arraivalLounge,
                     (IBaggageCollectionPointPassenger)baggageCollectionPoint,
                     (IArraivalTerminalExitPassenger)arraivalTerminalExit,
-                    (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay,
+                    (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay, departureTerminalTransferQuay, 
                     jorneyEnds);
             p[i].start();
             //  System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));

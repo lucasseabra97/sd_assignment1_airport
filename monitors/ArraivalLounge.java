@@ -14,6 +14,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	private int nPassengers=0;
 	private int maxPassengers;
 	private boolean collectBaggs; 
+	private boolean dayEnded;
 	//private final Random random = new Random();
 
 	public ArraivalLounge(int maxPassengers) {
@@ -21,6 +22,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		this.memBag = new ArrayList<Baggage>();
 		rl = new ReentrantLock(true);
 		collectBaggs = false;
+		dayEnded = false;
 		cPorter = rl.newCondition();
 	}
 	@Override
@@ -74,6 +76,17 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
         return null;
 	}
 
+	
+    public void endOfDay() {
+        rl.lock();
+        try {
+            dayEnded = true;
+            waitingPlane.signal();
+        } catch(Exception ex) {}
+        finally {
+            rl.unlock();
+        }
+    }
 
 }
 	

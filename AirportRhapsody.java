@@ -37,10 +37,12 @@ public class AirportRhapsody {
                 //System.out.println(bags[b]);
             }
             //array de bags é passado como argumento pq ajuda o porter a remove las
-            p[i] = new Passenger(i, bags,(IArraivalLoungePassenger)arraivalLounge,
-                    (IBaggageCollectionPointPassenger)baggageCollectionPoint,
-                    (IArraivalTerminalExitPassenger)arraivalTerminalExit,
-                    (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay, (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay,(IDepartureTerminalEntrancePassenger) departureTerminalEntrance, 
+            p[i] = new Passenger(i, bags,(IArraivalLoungePassenger) arraivalLounge,
+                    (IBaggageCollectionPointPassenger) baggageCollectionPoint,
+                    (IArraivalTerminalExitPassenger) arraivalTerminalExit,
+                    (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay, 
+                    (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay, 
+                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance,
                     jorneyEnds);
             p[i].start();
             //  System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));

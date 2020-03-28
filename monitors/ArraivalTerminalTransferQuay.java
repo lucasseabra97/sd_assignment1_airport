@@ -1,128 +1,134 @@
 package monitors;
-import threads.*;
+
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import model.*;
-import threads.Passenger;
+import threads.*;
 import interfaces.*;
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{
     private final ReentrantLock rl;
-	private final Condition waitLine;
-	private final Condition waitFull;
-	private final Condition waitAnnouncement;
-	private final Condition waitEnter;
-	private int flightCount;
-	private int maxFlights;
-	private int busSize;
-	private int passengers = 0;
-	private int passengersInside = 0;
-	private int passengersEntering = 0;
-    public ArraivalTerminalTransferQuay(int busSize,int maxFlights){
+    private final Condition waitPlace;
+    private final Condition waitFull;
+    private final Condition waitAnnouncment;
+    private final Condition waitEnterBus;
+    private int busSize;
+    private int passengers = 0;
+    private int passengersInside = 0;
+    private int passengersEntering = 0;
+    private Boolean endOfDay = false;
+
+    public ArraivalTerminalTransferQuay(int busSize) {
         rl = new ReentrantLock(true);
-		waitLine = rl.newCondition();
-		waitFull = rl.newCondition();
-		waitAnnouncement = rl.newCondition();
-		waitEnter = rl.newCondition();
-		this.busSize = busSize;
-		this.maxFlights = maxFlights;
+        this.busSize=busSize;
+        this.waitPlace = rl.newCondition();
+        this.waitFull = rl.newCondition();
+        this.waitAnnouncment = rl.newCondition();
+        this.waitEnterBus = rl.newCondition();
     }
-    /*
+
+    
     public void departureTime() {
         rl.lock();
         try {
-            //cBusDriver.signal();
-            timeout = true;
+            waitFull.signal();
         } catch(Exception ex) {
         } finally {
             rl.unlock();
         }
-       
     }
-    */
-    public void setFlight(int nFlight){
-		flightCount = nFlight+1;
-	}
+    
     @Override
-    public void takeABus(Passenger p){
-        //the driver is waken up the first time by the operation takeABus of the passenger 
-        //who arrives at the transfer terminal and finds out her place in the waiting queue
-        // equals the bus capacity, or when the departure time has been reached
+    public void takeABus(int passengerID){
         rl.lock();
-        try{  
+        try{
             //before blocking the 3 guy wakes up the BD
             passengers++;
-         
             while(passengersEntering >= busSize) {
-                waitLine.await();
+                waitPlace.await();
             }
             passengersEntering++;
             if (passengersEntering == busSize) {
                 waitFull.signal();
             }
-            waitAnnouncement.await();
-            
+            waitAnnouncment.await();
+
         }catch(Exception ex){}
         finally {
             rl.unlock();
-        } 
+        }
      }
     @Override
-    public void enterTheBus(){
+    public void enterTheBus(int passengerID){
         rl.lock();
         try{
             passengersInside++;
             if (passengersInside == passengersEntering) {
                 waitEnterBus.signalAll();
             }
-           
         }catch(Exception ex){}
         finally {
             rl.unlock();
         }
     }
+
     @Override
     public BusDriverAction hasDaysWorkEnded(){
         rl.lock();
         try {
-            busIsFull.await();
-            System.out.println("bus queue in size: "+ enterInBus.size());
-            
-            if(enterInBus.size() == busSize ){
-                System.out.println("Bus driving goging foward: "+enterInBus.size());
-                return BusDriverAction.goToDepartureTerminal;
-                
+
+            if(passengers > 0) {
+                waitPlace.signalAll();
             }
-           
-            System.out.println("Bus driver waiting for bus full");
-            return BusDriverAction.stayParked;
-        
-                       
+            waitFull.await();
+            if(passengers >0){
+                return BusDriverAction.goToDepartureTerminal;
+            }
+            if(endOfDay){
+                return BusDriverAction.dayEnded;
+            }else{
+                return BusDriverAction.stayParked;
+            }
+
         } catch (Exception e) {return BusDriverAction.stayParked;}
         finally{
             rl.unlock();
         }
-      
+
     }
     @Override
     public boolean annoucingBusBoarding() {
 		rl.lock();
 		try {
-            System.out.println("BUS AS ARRIVED AND WAITING FOR PASSENGERS TO ENTER");
-            cPassWaitingToEnter.signalAll();
-            //podem vir para o bus
-            
-            //LIMPAR QUEUe porque nao ha forma de tirar passageiros no departure terminal
-            enterInBus.clear();
+            System.out.println("A ANUNCIAR PARTIDA");
+			waitAnnouncment.signalAll();
+			waitEnterBus.await();
+            passengers = passengers - passengersEntering;
+            passengersEntering = 0;
+            passengersInside = 0;
             return true;
-			
+
 		} catch (Exception ex) {
 			return true;
 		} finally {
 			rl.unlock();
 		}
-	}
+    }
+    
+
+   
+    public Boolean endOfDay() {
+        rl.lock();
+        try {
+            endOfDay = true;
+            waitFull.signal();
+            return passengers == 0;
+        } catch(Exception ex) {
+            return true;
+        } finally {
+            rl.unlock();
+        }
+    }
 }

@@ -33,21 +33,7 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
         }
     }
 
-    @Override
-    public void prepareNextLeg() {
-        rl.lock();
-        try {
-            passengers++;
-            if(passengers == nrPassengers) {
-                waitingEnd.signalAll();
-            } else {
-                waitingEnd.await();
-            }
-        } catch(Exception ex) {}
-        finally {
-            rl.unlock();
-        }
-    }
+   
 
 
 

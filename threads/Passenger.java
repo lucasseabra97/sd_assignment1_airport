@@ -14,13 +14,14 @@ public class Passenger extends Thread {
 	private final IArraivalTerminalExitPassenger monitorAe;
 	private final IArraivalTerminalTransferQPassenger monitorTTQ;
 	private final IDepartureTerminalTransferQPassenger monitorDTTQ;
+	private final IDepartureTerminalEntrancePassenger monitorDEP;
 	private Baggage[] bags;
 	private List<Baggage> bagsCollected;
 	private int passengerID;
 	private int nbags;
 
 	// Monitors(interfaces) are passed as arguments
-	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, boolean jorneyEnds ) {
+	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP, boolean jorneyEnds ) {
 		this.passengerID = passengerID;
 		this.bags = bags;
 		this.jorneyEnds = jorneyEnds;
@@ -32,6 +33,7 @@ public class Passenger extends Thread {
 		this.monitorAe = monitorAe;
 		this.monitorTTQ = monitorTTQ;
 		this.monitorDTTQ = monitorDTTQ;
+		this.monitorDEP = monitorDEP;
 	}
 
 	public boolean isJorneyEnds() {
@@ -122,13 +124,13 @@ public class Passenger extends Thread {
 					break;
 
 				case AT_THE_DEPARTURE_TRANSFER_TERMINAL:
-				System.out.printf("Passenger:%d -> LEVING THE BUS \n",this.passengerID);
+					System.out.printf("Passenger:%d -> LEVING THE BUS \n",this.passengerID);
 					monitorDTTQ.leaveTheBus();
 					state = PassengerEnum.ENTERING_THE_DEPARTURE_TERMINAL;
 					break;
 				case ENTERING_THE_DEPARTURE_TERMINAL:
 					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT \n",this.passengerID);
-					monitorAe.prepareNextLeg();
+					monitorDEP.prepareNextLeg();
 					break loop;
 				case EXITING_THE_ARRIVAL_TERMINAL:
 					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL \n",this.passengerID);

@@ -11,26 +11,24 @@ import interfaces.*;
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{
     private final ReentrantLock rl;
-    private final Queue<Passenger> waitingForBus; 
-    private final Queue<Passenger> enterInBus;
-    private int busSize = 0;
-    private Time t;
-    private int timeout;
-    //private boolean timeout = false;
-    private final Condition cTimeout;
-    private final Condition cBusDriver; //variavel de condiçao para acordar o busdriver
-    //private final Condition waitingAnnouncment;//variavel de condiçao para acordar o passageiro qd o bus chega
-    private final Condition cPassWaitingToEnter; //variavel de condiçao para acordar o passageir->mimica
-    private final Condition busIsFull; //3 passenger wakes up the busDriver to go to Departure
-    public ArraivalTerminalTransferQuay(int busSize){
+	private final Condition waitLine;
+	private final Condition waitFull;
+	private final Condition waitAnnouncement;
+	private final Condition waitEnter;
+	private int flightCount;
+	private int maxFlights;
+	private int busSize;
+	private int passengers = 0;
+	private int passengersInside = 0;
+	private int passengersEntering = 0;
+    public ArraivalTerminalTransferQuay(int busSize,int maxFlights){
         rl = new ReentrantLock(true);
-        this.busSize=busSize;
-        this.cTimeout = rl.newCondition();
-        this.busIsFull = rl.newCondition();
-        this.cBusDriver = rl.newCondition();
-        this.cPassWaitingToEnter = rl.newCondition();
-        waitingForBus = new LinkedList<>();
-        enterInBus = new LinkedList<>();
+		waitLine = rl.newCondition();
+		waitFull = rl.newCondition();
+		waitAnnouncement = rl.newCondition();
+		waitEnter = rl.newCondition();
+		this.busSize = busSize;
+		this.maxFlights = maxFlights;
     }
     /*
     public void departureTime() {
@@ -45,6 +43,9 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
        
     }
     */
+    public void setFlight(int nFlight){
+		flightCount = nFlight+1;
+	}
     @Override
     public void takeABus(Passenger p){
         //the driver is waken up the first time by the operation takeABus of the passenger 
@@ -53,27 +54,16 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         rl.lock();
         try{  
             //before blocking the 3 guy wakes up the BD
-            waitingForBus.add(p);
-            //após o 1 passageiro conta o tempo
-            // if(waitingForBus.size()==1){ 
-            //     t = new Time(this);
-            //     t.run();
-            // }
-            
-            if (waitingForBus.size()==1){
-                cTimeout.wait(1000);
-                timeout = true;
+            passengers++;
+         
+            while(passengersEntering >= busSize) {
+                waitLine.await();
             }
-            if(waitingForBus.size()>=busSize)
-                cPassWaitingToEnter.await(); 
-                
-            //se ha 3 passageiros entao embarcam
-            if(waitingForBus.size()==busSize || timeout == 1000){
-                System.out.println("Passenger waiting for bus"+p.toString());
-                //t.join();
-                cBusDriver.signal();//acorda o BD mas adormece a seguir à espera do sinal do BD para os 3 entrarem
-      
+            passengersEntering++;
+            if (passengersEntering == busSize) {
+                waitFull.signal();
             }
+            waitAnnouncement.await();
             
         }catch(Exception ex){}
         finally {
@@ -82,21 +72,12 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
      }
     @Override
     public void enterTheBus(){
-        //and is waken up by the operation announcingBusBoarding of the driver to mimic her entry in the bus
-        //Na operação enterTheBus, cada passageiro, ao ser avisado pelo motorista que pode entrar no 
-        //autocarro, entra e senta-se num lugar disponível para efectuar a viagem de transferência 
         rl.lock();
         try{
-            
-            //sai da fila de espera para entrar no bus
-           
-           if(enterInBus.size()< busSize){
-              enterInBus.add(waitingForBus.remove());
-           }
-           if (enterInBus.size() == busSize ){
-                System.out.println("Passenger signal aqvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvui");
-                busIsFull.signal();// sinaliza o busDriver que já está cheio e podem ir para o departure
-           }
+            passengersInside++;
+            if (passengersInside == passengersEntering) {
+                waitEnterBus.signalAll();
+            }
            
         }catch(Exception ex){}
         finally {

@@ -22,6 +22,7 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     public void waitRide(){
         rl.lock();
         try{
+            System.out.println("");
             nPassengers++;
             waitingRide.await();
 

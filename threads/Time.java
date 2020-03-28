@@ -5,23 +5,25 @@ public class Time extends Thread {
 
     private int time = 0; 
 
-    private final ArrivalTerminalTransferQuay arrivalTerminalTransferQuay;
+    private final ArraivalTerminalTransferQuay arrivalTerminalTransferQuay;
 
-    public Time(ArrivalTerminalTransferQuay arrivalTerminalTransferQuay){
+    public Time(ArraivalTerminalTransferQuay arrivalTerminalTransferQuay) {
         this.arrivalTerminalTransferQuay = arrivalTerminalTransferQuay;
     }
 
     @Override
     public void run() {
-        try {
-            /* System.out.println("TEMPO -> " + time); */
-            //Thread.sleep(50);
-            Thread.sleep(timeout);
-            
-            cBusDriver.signal();
+        while (true) {  
+            try {
+                System.out.println("aquuiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"); 
+                //Thread.sleep(50);
+                int timeout = 1000;
+                Thread.sleep(timeout);
+                
+                //arrivalTerminalTransferQuay.departureTime();
 
-        } catch (Exception e) {}
-
+            } catch (Exception e) {}
+        }
     }
 
 }

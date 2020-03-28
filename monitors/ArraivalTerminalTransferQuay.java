@@ -1,5 +1,5 @@
 package monitors;
-
+import threads.*;
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,6 +14,10 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     private final Queue<Passenger> waitingForBus; 
     private final Queue<Passenger> enterInBus;
     private int busSize = 0;
+    private Time t;
+    private int timeout;
+    //private boolean timeout = false;
+    private final Condition cTimeout;
     private final Condition cBusDriver; //variavel de condiçao para acordar o busdriver
     //private final Condition waitingAnnouncment;//variavel de condiçao para acordar o passageiro qd o bus chega
     private final Condition cPassWaitingToEnter; //variavel de condiçao para acordar o passageir->mimica
@@ -21,19 +25,26 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public ArraivalTerminalTransferQuay(int busSize){
         rl = new ReentrantLock(true);
         this.busSize=busSize;
+        this.cTimeout = rl.newCondition();
         this.busIsFull = rl.newCondition();
         this.cBusDriver = rl.newCondition();
         this.cPassWaitingToEnter = rl.newCondition();
         waitingForBus = new LinkedList<>();
         enterInBus = new LinkedList<>();
     }
-
-    // public void departureTime(timeout) {
-        
-    //     cBusDriver.signal();
-        
-    // }
-
+    /*
+    public void departureTime() {
+        rl.lock();
+        try {
+            //cBusDriver.signal();
+            timeout = true;
+        } catch(Exception ex) {
+        } finally {
+            rl.unlock();
+        }
+       
+    }
+    */
     @Override
     public void takeABus(Passenger p){
         //the driver is waken up the first time by the operation takeABus of the passenger 
@@ -43,11 +54,23 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         try{  
             //before blocking the 3 guy wakes up the BD
             waitingForBus.add(p);
+            //após o 1 passageiro conta o tempo
+            // if(waitingForBus.size()==1){ 
+            //     t = new Time(this);
+            //     t.run();
+            // }
+            
+            if (waitingForBus.size()==1){
+                cTimeout.wait(1000);
+                timeout = true;
+            }
             if(waitingForBus.size()>=busSize)
                 cPassWaitingToEnter.await(); 
+                
             //se ha 3 passageiros entao embarcam
-            if(waitingForBus.size()==busSize){
+            if(waitingForBus.size()==busSize || timeout == 1000){
                 System.out.println("Passenger waiting for bus"+p.toString());
+                //t.join();
                 cBusDriver.signal();//acorda o BD mas adormece a seguir à espera do sinal do BD para os 3 entrarem
       
             }

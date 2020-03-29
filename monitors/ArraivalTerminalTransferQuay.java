@@ -86,9 +86,10 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
             if(passengers >0){
                 return BusDriverAction.goToDepartureTerminal;
             }
-            if(endOfDay){
+            else if(endOfDay){
                 return BusDriverAction.dayEnded;
-            }else{
+            }
+            else{
                 return BusDriverAction.stayParked;
             }
 

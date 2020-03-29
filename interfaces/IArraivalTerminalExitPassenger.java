@@ -1,5 +1,7 @@
 package interfaces;
 public interface IArraivalTerminalExitPassenger {
-    void goHome();
- 
+    boolean goHome(int npassengers);
+    void syncPassenger();
+    int nPassengersDepartureAT();
+    void awakePassengers();
 }

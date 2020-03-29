@@ -9,22 +9,29 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     private final ReentrantLock rl;
     private int nPassengers = 0;
     private final Condition passengersOut;
+    private boolean busArrived ;
     private final Condition waitingRide;
+    private int counterpassengersOut=0; 
     public  DepartureTerminalTransferQuay(){
         rl = new ReentrantLock(true);
         waitingRide = rl.newCondition();
         passengersOut = rl.newCondition();
-      
+        System.out.println("DEPARTURE TERMINAL RUN");
+        this.busArrived = false; 
 
     }
     
     @Override
     public void waitRide(){
+        //System.out.println("waiting ride");
         rl.lock();
         try{
-            System.out.println("");
+            System.out.println("waiting ride");
             nPassengers++;
-            waitingRide.await();
+            while(!busArrived)
+                waitingRide.await();
+           
+            
 
         }catch(Exception e){}
         finally{
@@ -38,6 +45,7 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
         rl.lock();
         try { 
             nPassengers --;
+            counterpassengersOut ++;
             if(nPassengers == 0){
                 passengersOut.signal();
                 System.out.println("Wake up bus to go backward");
@@ -52,10 +60,13 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     
     }  
     @Override
-    public void parkTheBusAndLetPassOff() {
+    public void parkTheBusAndLetPassOff( int busSize) {
         rl.lock();
         try {
-            System.out.println("Bus parked and let off");
+            
+            
+            System.out.println("Bus parked and let off"+ nPassengers) ;
+            busArrived = true; 
             waitingRide.signalAll();
             passengersOut.await();
             System.out.println("Bus going backward");

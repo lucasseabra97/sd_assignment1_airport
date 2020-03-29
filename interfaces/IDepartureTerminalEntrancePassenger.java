@@ -1,5 +1,8 @@
 package interfaces;
 public interface IDepartureTerminalEntrancePassenger {
    
-    void prepareNextLeg();
+    boolean prepareNextLeg(int npassengers);
+    void syncPassenger();
+    int nPassengersDepartureTEntrance();
+    void awakePassengers();
 }

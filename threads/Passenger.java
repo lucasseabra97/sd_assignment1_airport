@@ -19,6 +19,9 @@ public class Passenger extends Thread {
 	private List<Baggage> bagsCollected;
 	private int passengerID;
 	private int nbags;
+	private boolean end;
+	private int npassengersAe;
+	private int npassengersDEP;
 
 	// Monitors(interfaces) are passed as arguments
 	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP, boolean jorneyEnds ) {
@@ -34,6 +37,7 @@ public class Passenger extends Thread {
 		this.monitorTTQ = monitorTTQ;
 		this.monitorDTTQ = monitorDTTQ;
 		this.monitorDEP = monitorDEP;
+		this.end = true;
 	}
 
 	public boolean isJorneyEnds() {
@@ -66,7 +70,7 @@ public class Passenger extends Thread {
 		
 	@Override
     public void run() {   
-        loop :while (true){
+        while (end){
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:
 					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags and jouneyEnds:%b \n",this.passengerID,bags.length,this.jorneyEnds);
@@ -124,29 +128,45 @@ public class Passenger extends Thread {
 					break;
 
 				case AT_THE_DEPARTURE_TRANSFER_TERMINAL:
-					System.out.printf("Passenger:%d -> LEVING THE BUS \n",this.passengerID);
+					System.out.printf("Passenger:%d -> LEAVING THE BUS \n",this.passengerID);
 					monitorDTTQ.leaveTheBus();
 					state = PassengerEnum.ENTERING_THE_DEPARTURE_TERMINAL;
 					break;
 				case ENTERING_THE_DEPARTURE_TERMINAL:
+
 					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT \n",this.passengerID);
-					monitorDEP.prepareNextLeg();
-					break loop;
+					npassengersDEP = monitorDEP.nPassengersDepartureTEntrance();
+					monitorDEP.syncPassenger();
+					if(monitorDEP.prepareNextLeg(npassengersDEP)){
+						monitorAe.awakePassengers();
+						monitorDEP.awakePassengers();
+						
+					}
+					
+					end = false;
+					break ;
 				case EXITING_THE_ARRIVAL_TERMINAL:
 					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL \n",this.passengerID);
-					this.state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
-					monitorAe.goHome();
-					break loop;
+					npassengersAe = monitorAe.nPassengersDepartureAT();
+					monitorAe.syncPassenger();
+					if(monitorAe.goHome(npassengersAe)){
+						monitorAe.awakePassengers();
+						monitorDEP.awakePassengers();
+						
+					}
+					end = false;
+					break;
 				default :
 					//System.out.printf("ARRIVAL_TRANSFER_TERMINAL" + "passengerID=%d",this.passengerID);
 					
-            }
+			}
+			
         	try {
                 Thread.sleep(50);
 			} catch (Exception e) {}
 			
         }
-  
+		System.out.println("Passenger Ended : "+this.toString());
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import interfaces.*;
 import java.util.Random;
 
 
-public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter{
+public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter,IOpArrivalLounge{
 	private final ReentrantLock rl;
 	private ArrayList<Baggage> memBag;
 	private final Condition cPorter;
@@ -54,18 +54,21 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 
 	@Override
 	public  boolean takeARest(){
+		rl.lock();
 		try{
-			rl.lock();
-			while(collectBaggs==false)
-				cPorter.await();
-				collectBaggs=false;
-				return true;
 		
-			}catch(Exception ex){}
-			finally{
-				rl.unlock();
-			}
-		return false;
+			if(dayEnded)
+                return false;
+            cPorter.await();
+            return !dayEnded;
+		
+		}catch(Exception ex){
+			return true;
+		}
+		finally{
+			rl.unlock();
+		}
+		
 	}	
 	@Override
 	public Baggage tryToCollectABag(){
@@ -76,12 +79,12 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
         return null;
 	}
 
-	
+	@Override 
     public void endOfDay() {
         rl.lock();
         try {
             dayEnded = true;
-            waitingPlane.signal();
+            cPorter.signal();
         } catch(Exception ex) {}
         finally {
             rl.unlock();

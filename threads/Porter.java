@@ -8,22 +8,29 @@ public class Porter extends Thread{
     private Baggage bag;
     private final IArraivalLoungePorter monitorAl;
     private final IBaggageCollectionPointPorter monitorBCP;
-    
+    private boolean end;
     public Porter(IArraivalLoungePorter monitorAl,IBaggageCollectionPointPorter monitorBCP){
         this.monitorAl = monitorAl;
         this.monitorBCP = monitorBCP;
         this.state = PorterEnum.WAITING_FOR_A_PLANE_TO_LAND; //initial state
+        this.end = true;
     }
 
     @Override
     public void run() { 
-        loop : while(true){
+        while(end){
             switch(state){
                 case WAITING_FOR_A_PLANE_TO_LAND:
                     System.out.println("Porter waiting for a plain to land...");
-                    if (monitorAl.takeARest()) state = PorterEnum.AT_THE_PLANES_HOLD;
-                    else break loop;
-                break;
+                    
+                    if (monitorAl.takeARest())
+                        state = PorterEnum.AT_THE_PLANES_HOLD;
+                    else {
+                        System.out.println("End of day for porter");
+                        end = false;
+                        break;
+                    }
+                    break;
                 case AT_THE_PLANES_HOLD:    
                     System.out.println("Porter AT_THE_PLANES_HOLD");
                     bag = monitorAl.tryToCollectABag();
@@ -48,7 +55,9 @@ public class Porter extends Thread{
                 Thread.sleep(50);
             } catch (Exception e) {}
         }
+        System.out.println("Porter Ended");
     }
+ 
 
     
     @Override

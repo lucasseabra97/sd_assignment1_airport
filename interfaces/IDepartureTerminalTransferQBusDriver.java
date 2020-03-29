@@ -1,5 +1,5 @@
 package interfaces;
 
 public interface IDepartureTerminalTransferQBusDriver{
-    void parkTheBusAndLetPassOff();
+    void parkTheBusAndLetPassOff(int busSize);
 }

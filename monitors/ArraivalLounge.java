@@ -8,15 +8,43 @@ import java.util.Random;
 
 
 public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter,IOpArrivalLounge{
+	/**
+    * Arraival Lounge Variable for locking 
+	*/
 	private final ReentrantLock rl;
+	/**
+    * Arraival Lounge Memory for all baggages
+    */
 	private ArrayList<Baggage> memBag;
+	/**
+    * Arraival Lounge Conditional variable for waking up porter
+    */
 	private final Condition cPorter;
+	/**
+    * Arraival Lounge variable to count Passengers
+    */
 	private int nPassengers=0;
+	/**
+    * Arraival Lounge determine maxPassengers for Bus
+    */
 	private int maxPassengers;
+	/**
+    * Arraival Lounge boolean for Porter collect bags 
+    */
 	private boolean collectBaggs; 
+	/**
+    * Arraival Lounge boolean for end of cycle
+    */
 	private boolean dayEnded;
-	//private final Random random = new Random();
-
+	/**
+	 *  General Information Repository
+	 */
+	private GeneralRepository rep;
+	/**
+    * 
+	*  	Arraival Lounge shared Mem.
+    * 	@param maxPassengers
+    */
 	public ArraivalLounge(int maxPassengers) {
 		this.maxPassengers = maxPassengers;
 		this.memBag = new ArrayList<Baggage>();
@@ -25,11 +53,21 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		dayEnded = false;
 		cPorter = rl.newCondition();
 	}
+
+
+	/**
+	 * Puts passenger in {AT_DISEMBARKING_ZONE} state. <p/>
+	 * Disembarks passenger and notifies Porter
+	 * @param bags
+	 * @param jorneyEnds
+	 * @return PassengerAction
+	 */
 	@Override
-	public PassengerAction whatShouldIDO(Baggage[] bags,boolean jorneyEnds) {
-		
+	public PassengerAction whatShouldIDO(int passengerID,Baggage[] bags,boolean jorneyEnds) {
+		rl.lock();
         try {
-			rl.lock();
+			//rep.passengerState(passengerID, PassengerEnum.AT_THE_DISEMBARKING_ZONE, jorneyEnds, bags.length);
+			
 			//Thread.sleep(100);
 			for(int i=0;i<bags.length;i++){
 				//System.out.println(bags[i]);
@@ -51,12 +89,17 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 			return bags.length ==0 ? PassengerAction.goHome : PassengerAction.collecBag;
 		return PassengerAction.takeABus;
 	}
-
+	/**
+	 * Porter in {WAITING_FOR_A_PLANE_TO_LAND} state
+	 * @return dayEnded
+	 * 
+	 */	
 	@Override
 	public  boolean takeARest(){
 		rl.lock();
 		try{
-		
+
+			//rep.porterState(PorterEnum.WAITING_FOR_A_PLANE_TO_LAND);
 			if(dayEnded)
                 return false;
             cPorter.await();
@@ -68,14 +111,22 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		finally{
 			rl.unlock();
 		}
-		
-	}	
+	}
+	/**
+	 * Porter in {AT_THE_PLANES_HOLDWAITING_FOR_PLANE_TO_LAND} state
+	 * @return bag
+	 * 
+	 */	
 	@Override
 	public Baggage tryToCollectABag(){
+		//rep.porterState(PorterEnum.AT_THE_PLANES_HOLD);
+		rl.lock();
 		if(memBag.size() > 0) {
+			
 			//System.out.println(memBag.size());
             return memBag.remove(0);
-        }
+		}
+		rl.unlock();
         return null;
 	}
 

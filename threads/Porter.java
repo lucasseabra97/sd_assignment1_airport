@@ -4,11 +4,35 @@ import interfaces.*;
 
 
 public class Porter extends Thread{
+    /**
+	* State for Porter
+    */
     private PorterEnum state;
-    private Baggage bag;
-    private final IArraivalLoungePorter monitorAl;
-    private final IBaggageCollectionPointPorter monitorBCP;
+	/**
+	* Next action of Porter
+	*/
     private boolean end;
+    /**
+	* Next bag for Porter collect
+	*/
+    private Baggage bag;
+    /**
+    * Interface Porter Arraival Lounge  
+    */
+    private final IArraivalLoungePorter monitorAl;
+    /**
+    * Interface Passenger Baggage Collection Point 
+    */
+    private final IBaggageCollectionPointPorter monitorBCP;
+    
+
+    /**
+    * 
+    *  Porter entity 
+    * 
+    * @author João Monteiro 
+    * @author Lucas Seabra
+    */
     public Porter(IArraivalLoungePorter monitorAl,IBaggageCollectionPointPorter monitorBCP){
         this.monitorAl = monitorAl;
         this.monitorBCP = monitorBCP;

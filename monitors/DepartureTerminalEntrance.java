@@ -6,13 +6,33 @@ import java.util.concurrent.locks.ReentrantLock;
 import interfaces.IDepartureTerminalEntrancePassenger;
 
 public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePassenger{
+    /**
+    * Departure Terminal Entrance Variable for locking 
+	*/
     private final ReentrantLock rl;
+    /**
+    * Departure Terminal Entrance Conditional variable for waiting all passengers to exit
+	*/
     private final Condition waitingEnd;
+    /**
+    *  Departure Terminal Entrance variable to count passengers
+	*/
     private int passengers = 0;
+     /**
+    * Departure Terminal Entrance Conditional variable for nº off all passengers
+	*/
     private int nrPassengers;
+    /**
+    * Departure Terminal Entrance boolean to check if all can go home
+	*/
     private boolean goingHome;
 
-
+    /**
+	* Departure Terminal Entrance shared Mem.
+	* 
+	* @param nrPassengers
+	*
+	*/
   
     public DepartureTerminalEntrance(int nrPassengers) {
         rl = new ReentrantLock(true);
@@ -21,7 +41,10 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
         this.goingHome = false;
     }
 
-
+    /**
+	*  Increments passengers at Departure Terminal Entrance
+	*  
+    */
     @Override 
     public void syncPassenger(){
         rl.lock();
@@ -36,7 +59,10 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
        
         
     }
-
+     /**
+	* Wakes upp all passengers and end Cycle  Departure Terminal Entrance
+	*
+	*/
     @Override
     public void awakePassengers(){
         rl.lock();
@@ -49,6 +75,10 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
         }
     }
 
+    /**
+	*  Returns all passengers in Departure Terminal Entrance
+	*  @return passengers
+	*/
     @Override
     public int nPassengersDepartureTEntrance(){
         rl.lock();
@@ -60,7 +90,11 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
         }
         
     }
-
+    /**
+	 * Puts passenger in {ENTERING_THE_DEPARTURE_TERMINAL} if prepare Next Flight end cycle. 
+	 * @param npassengers
+	 * @return lastone
+	 */        
     @Override
     public boolean prepareNextLeg(int npassengers) {
         rl.lock();

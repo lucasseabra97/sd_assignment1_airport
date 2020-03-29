@@ -7,23 +7,78 @@ import java.util.List;
 
 import interfaces.*;
 public class Passenger extends Thread {
+	/**
+	* State for Passenger
+	*/
 	private PassengerEnum state;
-	private final IArraivalLoungePassenger monitorAl;
-	private final IBaggageCollectionPointPassenger monitorBc;
+	/**
+	* Next action of Passenger
+	*/
+	private PassengerAction action;
+	/**
+	* verifying if passenger has another flight
+	*/
 	private boolean jorneyEnds;
+	/**
+    * Interface Passenger Arraival Lounge
+    */
+	private final IArraivalLoungePassenger monitorAl;
+	/**
+    * Interface Passenger Baggage Collection Point 
+    */
+	private final IBaggageCollectionPointPassenger monitorBc;
+	/**
+    * Interface Passenger Terminal Exit  
+    */
 	private final IArraivalTerminalExitPassenger monitorAe;
+	/**
+    * Interface Passenger Arraival Terminal Transfer Quay  
+    */
 	private final IArraivalTerminalTransferQPassenger monitorTTQ;
+	/**
+    * Interface Passenger Departure Terminal Transfer  
+    */
 	private final IDepartureTerminalTransferQPassenger monitorDTTQ;
+	/**
+    * Interface Passenger Departure Terminal Entrance  
+    */
 	private final IDepartureTerminalEntrancePassenger monitorDEP;
+	/**
+    * Array of Passenger bags  
+    */
 	private Baggage[] bags;
+	/**
+    * List of bags collected by Passenger 
+    */
 	private List<Baggage> bagsCollected;
+	/**
+    * Passenger ID  
+    */
 	private int passengerID;
+	/**
+    * Number of Passenger bags  
+    */
 	private int nbags;
+	 /**
+    * Terminate Passenger cicle if yes
+    */
 	private boolean end;
+	/**
+    * Number of Passengers in Arrival terminal Exit
+    */
 	private int npassengersAe;
+	/**
+    * Number of Passengers in Departure Terminal Entrance
+    */
 	private int npassengersDEP;
 
-	// Monitors(interfaces) are passed as arguments
+	/**
+    * 
+    *  Passenger entity 
+    * 
+    * @author João Monteiro 
+    * @author Lucas Seabra
+    */
 	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP, boolean jorneyEnds ) {
 		this.passengerID = passengerID;
 		this.bags = bags;
@@ -74,7 +129,7 @@ public class Passenger extends Thread {
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:
 					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags and jouneyEnds:%b \n",this.passengerID,bags.length,this.jorneyEnds);
-					PassengerAction action = this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds);
+					action = this.monitorAl.whatShouldIDO(this.passengerID,this.bags, this.jorneyEnds);
 					if(action == PassengerAction.goHome){
 						state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 					}	
@@ -113,6 +168,12 @@ public class Passenger extends Thread {
 						}
 						idx ++;	
 					}
+					break;
+
+
+				case AT_THE_BAGGAGE_RECLAIM_OFFICE:
+					
+					
 					break;
 				case AT_THE_ARRIVAL_TRANSFER_TERMINAL:
 					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL WATING FOR BUS \n",this.passengerID);

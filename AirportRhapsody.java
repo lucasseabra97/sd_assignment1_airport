@@ -2,11 +2,34 @@
 import java.lang.management.MonitorInfo;
 import java.util.Random;
 import interfaces.*;
+import java.io.*;
 import threads.*;
 import monitors.*;
 import model.*;
 public class AirportRhapsody {
-    public static void main(String[] args){
+
+    /**
+	 * @param args
+	 * @throws InterruptedException
+	 */
+    public static void main(String[] args)throws IOException{
+
+
+        // creates new logger
+		File logger = new File("logger.txt");
+		if(logger.createNewFile()){
+			//System.out.println("Logger created: " + logger.getName());
+        }
+        else{
+			logger.delete();
+			logger.createNewFile();
+			// System.out.println("File already exists.");
+			
+		}
+		GeneralRepository genInfoRepo = new GeneralRepository(logger);
+
+
+
         System.out.println("----------AirportRhapsody---------");
         final Random random = new Random();
         final int maxPassengers = 6;

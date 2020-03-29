@@ -9,17 +9,53 @@ import threads.*;
 import interfaces.*;
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{
+    /**
+    * Arriaval Terminal Transfer Quay for locking 
+	*/
     private final ReentrantLock rl;
+    /**
+    * Arriaval Terminal Transfer Quay  Conditional variable for Passengers to wait for bus signal
+	*/
     private final Condition waitPlace;
+    /**
+    * Arriaval Terminal Transfer Quay  Conditional variable to  signal BusDriver its full 
+	*/
     private final Condition waitFull;
+    /**
+    *  Arriaval Terminal Transfer Quay Conditional variable to announce bus is going FOWARD
+    */
     private final Condition waitAnnouncment;
+    /**
+    *  Arriaval Terminal Transfer Quay Conditional variable to wait to enter in bus
+    */
     private final Condition waitEnterBus;
+    /**
+    * Arriaval Terminal Transfer Quay  variable determine bus Capacity
+	*/
     private int busSize;
+    /**
+    * Arriaval Terminal Transfer Quay variable to count all passengers
+	*/
     private int passengers = 0;
+      /**
+    * Arriaval Terminal Transfer Quay  variable to count passengers In the bus
+	*/
     private int passengersInside = 0;
+    /**
+    * Arriaval Terminal Transfer Quay  variable to count passengers entering
+    */
     private int passengersEntering = 0;
+    /**
+    * Arriaval Terminal Transfer Quay  variable to determine if cycle ended
+	*/
     private Boolean endOfDay = false;
 
+     /**
+	* Arriaval Terminal Transfer Quay shared Mem.
+	* 
+	* @param busSize
+	*
+	*/
     public ArraivalTerminalTransferQuay(int busSize) {
         rl = new ReentrantLock(true);
         this.busSize=busSize;
@@ -39,7 +75,11 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
             rl.unlock();
         }
     }
-    
+    /**
+	*  Passenger at the AT_THE_ARRIVAL_TRANSFER_TERMINAL state and waiting to take a Bus 
+	*  @param passengerID
+    */
+
     @Override
     public void takeABus(int passengerID){
         rl.lock();
@@ -60,6 +100,11 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
             rl.unlock();
         }
      }
+
+     /**
+	*  Passenger at the AT_THE_ARRIVAL_TRANSFER_TERMINAL state and entering the Bus going to ENTERING_THE_DEPARTURE_TERMINAL
+	*  @param passengerID
+    */
     @Override
     public void enterTheBus(int passengerID){
         rl.lock();
@@ -73,7 +118,10 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
             rl.unlock();
         }
     }
-
+    /**
+	*  Bus Driver at the PARKING_AT_THE_ARRIVAL_TERMINAL and determing if needs to go FOWARD
+	*  @return BusdriverAction
+    */
     @Override
     public BusDriverAction hasDaysWorkEnded(){
         rl.lock();
@@ -99,6 +147,11 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         }
 
     }
+
+      /**
+	*  Bus Driver at the PARKING_AT_THE_ARRIVAL_TERMINAL and next action goToDepartureTerminal 
+	*  @return BusdriverAction
+    */
     @Override
     public boolean annoucingBusBoarding() {
 		rl.lock();

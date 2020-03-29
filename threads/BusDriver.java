@@ -6,12 +6,40 @@ import model.*;
 public class BusDriver extends Thread{
     private int numLimitPassenger;
     private BusDriverEnum state;
+    /**
+    * Integer   to count time
+    */
     private int time = 0; 
+    /**
+     * Interface Busdriver Arraival Terminal Transfer Quay
+     */
     private final IArraivalTerminalTransferQBusDriver terminalTQBusDriver;
+
+    /**
+    * Interface Busdriver Departure Terminal Transfer Quay
+    */
     private final IDepartureTerminalTransferQBusDriver departureTerminalQBusDriver;
+    /**
+    *  Bus Capacity
+    */
     private final int busSize;
+    /**
+    * Terminate busDriver cicle if yes
+    */
     private boolean end;
+    /**
+    * Determine busdriver next action
+    */
+    private BusDriverAction busState;
    
+
+    /**
+    * 
+    *  Bus driver entity 
+    * 
+    * @author João Monteiro 
+    * @author Lucas Seabra
+    */
     public BusDriver(IArraivalTerminalTransferQBusDriver terminalTQBusDriver,IDepartureTerminalTransferQBusDriver departureTerminalQBusDriver , int busSize){
         this.state = state.PARKING_AT_THE_ARRIVAL_TERMINAL;
         this.busSize = busSize;
@@ -26,8 +54,7 @@ public class BusDriver extends Thread{
         while(end){
             switch(state){
                 case PARKING_AT_THE_ARRIVAL_TERMINAL: 
-                    System.out.println("BUSDRIVER waiting for passengers...");                   
-                    BusDriverAction busState = terminalTQBusDriver.hasDaysWorkEnded();  
+                    busState = terminalTQBusDriver.hasDaysWorkEnded();  
                     if(busState == BusDriverAction.stayParked)
                     {
                         System.out.println("Bus driver parked");

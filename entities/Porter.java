@@ -1,5 +1,5 @@
-package threads;
-import model.*;
+package entities;
+import commonInfra.*;
 import interfaces.*;
 
 

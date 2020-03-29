@@ -1,5 +1,5 @@
 package interfaces;
-import model.*;
+import commonInfra.*;
 
 
 public interface IBaggageCollectionPointPassenger{

@@ -1,4 +1,4 @@
-package model;
+package commonInfra;
 
 public enum PorterEnum {
 	WAITING_FOR_A_PLANE_TO_LAND,

@@ -3,9 +3,9 @@ import java.lang.management.MonitorInfo;
 import java.util.Random;
 import interfaces.*;
 import java.io.*;
-import threads.*;
-import monitors.*;
-import model.*;
+import entities.*;
+import shared_regions.*;
+import commonInfra.*;
 public class AirportRhapsody {
 
     /**

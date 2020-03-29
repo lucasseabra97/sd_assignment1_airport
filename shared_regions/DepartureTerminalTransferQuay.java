@@ -1,4 +1,4 @@
-package monitors;
+package shared_regions;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;

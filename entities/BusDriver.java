@@ -1,7 +1,7 @@
-package threads;
+package entities;
 
 import interfaces.*;
-import model.*;
+import commonInfra.*;
 
 public class BusDriver extends Thread{
     private int numLimitPassenger;

@@ -1,4 +1,4 @@
-package model;
+package commonInfra;
 
 public enum BusDriverEnum {
 	PARKING_AT_THE_ARRIVAL_TERMINAL,

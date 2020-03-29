@@ -1,5 +1,5 @@
-package monitors;
-import model.*;
+package shared_regions;
+import commonInfra.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.ArrayList;

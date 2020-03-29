@@ -1,9 +1,9 @@
-package monitors;
+package shared_regions;
 
 import java.util.List;
 import java.util.ArrayList;
 
-import model.Baggage;
+import commonInfra.*;
 
 import java.util.concurrent.locks.ReentrantLock;
 

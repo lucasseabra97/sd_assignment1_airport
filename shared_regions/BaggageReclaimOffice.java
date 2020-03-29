@@ -1,5 +1,5 @@
-package monitors;
-import model.*;
+package shared_regions;
+import commonInfra.*;
 public class BaggageReclaimOffice {
 
     
@@ -15,8 +15,8 @@ public class BaggageReclaimOffice {
      * @param passengerID
      */
     public void reportMissingBags(int i, int passengerID) {
-        rep.passengerState(passengerID, PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE);
-        rep.missingBags(i, passengerID);
+        //rep.passengerState(passengerID, PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE);
+        //rep.missingBags(i, passengerID);
     }
 
     

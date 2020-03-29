@@ -1,11 +1,11 @@
-package monitors;
+package shared_regions;
 
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import model.*;
-import threads.*;
+import commonInfra.*;
+import entities.*;
 import interfaces.*;
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{

@@ -1,4 +1,4 @@
-package model;
+package commonInfra;
 
 public enum BusDriverAction{
     stayParked,

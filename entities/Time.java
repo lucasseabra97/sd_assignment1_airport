@@ -1,7 +1,7 @@
-package threads;
+package entities;
 
 
-import monitors.*;
+import shared_regions.*;
 
 public class Time extends Thread {
     

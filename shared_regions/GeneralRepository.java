@@ -1,11 +1,11 @@
-package monitors;
+package shared_regions;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import model.*;
-import threads.*;
+import commonInfra.*;
+import entities.*;
 
 public class GeneralRepository{
     /**

@@ -1,6 +1,6 @@
 package interfaces;
 
-import threads.Passenger;
+import entities.*;
 
 public interface IDepartureTerminalTransferQPassenger{
     void leaveTheBus();

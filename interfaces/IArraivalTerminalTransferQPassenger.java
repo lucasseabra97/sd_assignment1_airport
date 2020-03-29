@@ -1,6 +1,6 @@
 
 package interfaces;
-import threads.*;
+import entities.*;
 
 public interface IArraivalTerminalTransferQPassenger{
     void takeABus(int passengerID);

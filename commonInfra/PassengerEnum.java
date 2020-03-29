@@ -1,4 +1,4 @@
-package model;
+package commonInfra;
 
 public enum PassengerEnum{
 	    AT_THE_DISEMBARKING_ZONE,

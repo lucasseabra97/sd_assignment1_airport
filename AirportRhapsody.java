@@ -37,6 +37,7 @@ public class AirportRhapsody {
         final Random random = new Random();
         final int maxPassengers = 6;
         final int busSize = 3;
+        final int planeLandings=5;
         Baggage [] bags = null;
          /**
 		*{@link entities.Passenger}

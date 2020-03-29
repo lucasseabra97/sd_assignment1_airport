@@ -38,7 +38,7 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     }
 
     /**
-	 * Puts passenger in {EXITING_THE_ARRIVAL_TERMINAL} if go home end cycle. 
+	 * Puts passenger in {@link  commonInfra.PassengerEXITING_THE_ARRIVAL_TERMINAL} if go home end cycle. 
 	 * @param npassengers
 	 * @return lastone
 	 */

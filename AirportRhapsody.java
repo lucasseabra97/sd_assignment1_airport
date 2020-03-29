@@ -1,11 +1,14 @@
 
-import java.lang.management.MonitorInfo;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
-import interfaces.*;
-import java.io.*;
+
+import commonInfra.Baggage;
 import entities.*;
 import shared_regions.*;
-import commonInfra.*;
+import interfaces.*;
+
 public class AirportRhapsody {
 
     /**
@@ -35,18 +38,53 @@ public class AirportRhapsody {
         final int maxPassengers = 6;
         final int busSize = 3;
         Baggage [] bags = null;
+         /**
+		*{@link entities.Passenger}
+		*/
         Passenger p[] = new Passenger[maxPassengers];
+        // Initialize shared region ArraivalLounge
+		/**
+		* {@link shared_regions.ArraivalLounge}
+		*/
         ArraivalLounge arraivalLounge = new ArraivalLounge(maxPassengers);
+        // Initialize shared region BaggageCollectionPoint
+		/**
+		* {@link shared_regions.BaggageCollectionPoint}
+		*/
         BaggageCollectionPoint baggageCollectionPoint = new BaggageCollectionPoint();
+        // Initialize shared region ArraivalTerminalExit
+		/**
+		* {@link shared_regions.ArraivalTerminalExit}
+		*/
         ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(maxPassengers);
+        // Initialize shared region ArraivalTerminalTransferQuay
+		/**
+		* {@link shared_regions.ArraivalTerminalTransferQuay}
+		*/
         ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(busSize);
+        // Initialize shared region DepartureTerminalTransferQuay
+		/**
+		* {@link shared_regions.DepartureTerminalTransferQuay}
+		*/
         DepartureTerminalTransferQuay departureTerminalTransferQuay = new DepartureTerminalTransferQuay();
+        // Initialize shared region DepartureTerminalEntrance
+		/**
+		* {@link shared_regions.DepartureTerminalEntrance}
+		*/
         DepartureTerminalEntrance departureTerminalEntrance = new DepartureTerminalEntrance(maxPassengers);
+        /**
+		 *{@link entities.Porter}
+		 */
         Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
         porter.start();
+        /**
+		*{@link entities.BusDriver}
+		*/
         BusDriver busdriver = new BusDriver(arraivalTerminalTransferQuay , departureTerminalTransferQuay,busSize);
         busdriver.start();
-
+         /**
+		*{@link entities.Time}
+		*/
         Time time = new Time(arraivalTerminalTransferQuay, arraivalLounge);
         time.start();
 

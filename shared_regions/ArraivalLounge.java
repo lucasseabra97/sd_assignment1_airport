@@ -56,7 +56,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 
 
 	/**
-	 * Puts passenger in {AT_DISEMBARKING_ZONE} state. <p/>
+	 * Returns passenger action in {@link commonInfra.PassengerAction} state. <p/>
 	 * Disembarks passenger and notifies Porter
 	 * @param bags
 	 * @param jorneyEnds
@@ -90,7 +90,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		return PassengerAction.takeABus;
 	}
 	/**
-	 * Porter in {WAITING_FOR_A_PLANE_TO_LAND} state
+	 * Porter in {@link commonInfra.PorterEnum.WAITING_FOR_A_PLANE_TO_LAND} state
 	 * @return dayEnded
 	 * 
 	 */	
@@ -113,7 +113,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		}
 	}
 	/**
-	 * Porter in {AT_THE_PLANES_HOLDWAITING_FOR_PLANE_TO_LAND} state
+	 * Porter in {@link  commonInfra.PorterEnum.AT_THE_PLANES_HOLDWAITING_FOR_PLANE_TO_LAND} state
 	 * @return bag
 	 * 
 	 */	

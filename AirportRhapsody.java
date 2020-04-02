@@ -1,10 +1,12 @@
 
-
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-
+import main.*;
 import commonInfra.Baggage;
+
 import entities.*;
 import shared_regions.*;
 import interfaces.*;
@@ -13,6 +15,7 @@ public class AirportRhapsody {
 
     /**
 	 * @param args
+     * @return 
 	 * @throws InterruptedException
 	 */
     public static void main(String[] args)throws IOException{
@@ -35,95 +38,111 @@ public class AirportRhapsody {
 
         System.out.println("----------AirportRhapsody---------");
         final Random random = new Random();
-        final int maxPassengers = 6;
-        final int busSize = 3;
-        final int planeLandings=5;
-        Baggage [] bags = null;
-         /**
-		*{@link entities.Passenger}
-		*/
-        Passenger p[] = new Passenger[maxPassengers];
+        // final int nrPassengers = 6;
+        // final int busSize = 3;
+        // final int maxBags = 3;
+        // final int fligths=5;
+       /**
+		 * List of every {@link Bag} of every flight occurring in this airport.
+		 */
+		List<List<Integer>> bags = generateRandBags(global.NR_PASSENGERS, global.MAX_BAGS, global.NR_FLIGHTS);
+        /**
+         * {@link entities.Passenger}
+         */
+
+        Passenger p[] = new Passenger[global.NR_PASSENGERS];
         // Initialize shared region ArraivalLounge
-		/**
-		* {@link shared_regions.ArraivalLounge}
-		*/
-        ArraivalLounge arraivalLounge = new ArraivalLounge(maxPassengers);
+        /**
+         * {@link shared_regions.ArraivalLounge}
+         */
+        ArraivalLounge arraivalLounge = new ArraivalLounge(global.NR_PASSENGERS);
         // Initialize shared region BaggageCollectionPoint
-		/**
-		* {@link shared_regions.BaggageCollectionPoint}
-		*/
+        /**
+         * {@link shared_regions.BaggageCollectionPoint}
+         */
         BaggageCollectionPoint baggageCollectionPoint = new BaggageCollectionPoint();
         // Initialize shared region ArraivalTerminalExit
-		/**
-		* {@link shared_regions.ArraivalTerminalExit}
-		*/
-        ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(maxPassengers);
+        /**
+         * {@link shared_regions.ArraivalTerminalExit}
+         */
+        ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(global.NR_PASSENGERS);
         // Initialize shared region ArraivalTerminalTransferQuay
-		/**
-		* {@link shared_regions.ArraivalTerminalTransferQuay}
-		*/
-        ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(busSize);
+        /**
+         * {@link shared_regions.ArraivalTerminalTransferQuay}
+         */
+        ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(global.BUS_SIZE);
         // Initialize shared region DepartureTerminalTransferQuay
-		/**
-		* {@link shared_regions.DepartureTerminalTransferQuay}
-		*/
+        /**
+         * {@link shared_regions.DepartureTerminalTransferQuay}
+         */
         DepartureTerminalTransferQuay departureTerminalTransferQuay = new DepartureTerminalTransferQuay();
         // Initialize shared region DepartureTerminalEntrance
-		/**
-		* {@link shared_regions.DepartureTerminalEntrance}
-		*/
-        DepartureTerminalEntrance departureTerminalEntrance = new DepartureTerminalEntrance(maxPassengers);
         /**
-		 *{@link entities.Porter}
-		 */
+         * {@link shared_regions.DepartureTerminalEntrance}
+         */
+        DepartureTerminalEntrance departureTerminalEntrance = new DepartureTerminalEntrance(global.NR_PASSENGERS);
+        /**
+         * {@link entities.Porter}
+         */
         Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
         porter.start();
         /**
-		*{@link entities.BusDriver}
-		*/
-        BusDriver busdriver = new BusDriver(arraivalTerminalTransferQuay , departureTerminalTransferQuay,busSize);
+         * {@link entities.BusDriver}
+         */
+        BusDriver busdriver = new BusDriver(arraivalTerminalTransferQuay, departureTerminalTransferQuay,
+                global.BUS_SIZE);
         busdriver.start();
-         /**
-		*{@link entities.Time}
-		*/
+        /**
+         * {@link entities.Time}
+         */
         Time time = new Time(arraivalTerminalTransferQuay, arraivalLounge);
         time.start();
 
-        for(int i=0;i<maxPassengers;i++){
-                //random nbags gerados para cada passageiro 
-            int nBags = random.nextInt(3);
-            boolean jorneyEnds = random.nextBoolean();
-            bags = new Baggage[nBags];
-            //a ideia e para cada passageiro atualizar a info da mala associada ao mesmo pq 
-            //se o passageiro id0 tiver 2 malas entao a mala 0 e 1 tem associadas a si o passageiro id0 
-            //e o estado do mesmo para que o porter, após todos cheguarem possa decidir onde colocar as malas
-            for(int b=0;b<nBags;b++){
-                //i => id
-                bags[b] = new Baggage(i,jorneyEnds);
-                //System.out.println(bags[b]);
-            }
-            //array de bags é passado como argumento pq ajuda o porter a remove las
-            p[i] = new Passenger(i, bags,(IArraivalLoungePassenger) arraivalLounge,
+        for (int i = 0; i < global.NR_PASSENGERS; i++) {
+
+            // array de bags é passado como argumento pq ajuda o porter a remove las
+            p[i] = new Passenger(i, bags.get(i), (IArraivalLoungePassenger) arraivalLounge,
                     (IBaggageCollectionPointPassenger) baggageCollectionPoint,
                     (IArraivalTerminalExitPassenger) arraivalTerminalExit,
-                    (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay, 
-                    (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay, 
-                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance,
-                    jorneyEnds);
+                    (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay,
+                    (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay,
+                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance);
             p[i].start();
-            //  System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));
+            // System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags,
+            // p[i]));
         }
 
         try {
             porter.join();
             busdriver.join();
             time.join();
-            for(int i = 0; i < maxPassengers; i++) {
+            for (int i = 0; i < global.NR_PASSENGERS; i++) {
                 p[i].join();
             }
         } catch (Exception e) {
 
         }
+
     }
+
+    public static List<List<Integer>> generateRandBags(int nrPassengers, int maxBags, int nrFlights) {
+            List<List<Integer>> bagsPerPassenger = new ArrayList<List<Integer>>(nrPassengers);
+		    int[] bagsPerFlight = new int[nrFlights];
+            List<Integer> bagsList;
+           
+            for(int p=0;p<nrPassengers;p++){
+                bagsList = new ArrayList<Integer>();
+                
+                for(int v=0;v<nrFlights;v++){
+                    Random random = new Random();
+                    int nrBagsRand =random.nextInt(maxBags + 1);
+                    bagsList.add(nrBagsRand);
+                    bagsPerFlight[v] += nrBagsRand;
+                }
+                bagsPerPassenger.add(bagsList);
+            }
+            return bagsPerPassenger;
+        }
+    
 }
    

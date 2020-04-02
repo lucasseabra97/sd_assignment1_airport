@@ -4,7 +4,9 @@ import commonInfra.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
+import main.*;
 import interfaces.*;
 public class Passenger extends Thread {
 	/**
@@ -46,7 +48,11 @@ public class Passenger extends Thread {
 	/**
     * Array of Passenger bags  
     */
-	private Baggage[] bags;
+	private List<Integer> numBags;
+	/**
+     * Number of passenger's {@link Bag}s per flight
+     */
+    private Baggage[] bags;
 	/**
     * List of bags collected by Passenger 
     */
@@ -79,10 +85,10 @@ public class Passenger extends Thread {
     * @author João Monteiro 
     * @author Lucas Seabra
     */
-	public Passenger(int passengerID,Baggage[] bags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP, boolean jorneyEnds ) {
+	public Passenger(int passengerID,List<Integer> numBags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP) {
 		this.passengerID = passengerID;
-		this.bags = bags;
-		this.jorneyEnds = jorneyEnds;
+		this.numBags = numBags;
+		//this.jorneyEnds = jorneyEnds;
 		this.monitorBc = monitorBc;
 		this.monitorAl = monitorAl;
 		this.state = PassengerEnum.AT_THE_DISEMBARKING_ZONE;	
@@ -107,13 +113,13 @@ public class Passenger extends Thread {
 		this.jorneyEnds = jorneyEnds;
 	}
 
-	public Baggage[] getBags() {
-		return this.bags;
-	}
+	// public Baggage[] getBags() {
+	// 	return this.bags;
+	// }
 
-	public void setBags(Baggage[] bags) {
-		this.bags = bags;
-	}
+	// public void setBags(Baggage[] bags) {
+	// 	this.bags = bags;
+	// }
 
 	public int getPassengerID() {
 		return this.passengerID;
@@ -125,6 +131,21 @@ public class Passenger extends Thread {
 		
 	@Override
     public void run() {   
+		Random rand;
+		for (int i = 0; i < global.NR_FLIGHTS; i++) {
+			//random nbags gerados para cada passageiro 
+			rand = new Random();	
+			boolean jorneyEnds = rand.nextBoolean();
+			bags = new Baggage[numBags.get(i)];
+			//a ideia e para cada passageiro atualizar a info da mala associada ao mesmo pq 
+			//se o passageiro id0 tiver 2 malas entao a mala 0 e 1 tem associadas a si o passageiro id0 
+			//e o estado do mesmo para que o porter, após todos cheguarem possa decidir onde colocar as malas
+			for(int b=0;b<bags.length;b++){
+				//i => id
+				bags[b] = new Baggage(i,jorneyEnds);
+				//System.out.println(bags[b]);
+			}
+		}
         while (end){
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:

@@ -84,10 +84,11 @@ public class AirportRhapsody {
         /**
          * {@link entities.Porter}
          */
-
         /**
-		* {@link shared_regions.DepartureTerminalEntrance}
+		* {@link shared_regions.BaggageReclaimOffice}
         */
+        BaggageReclaimOffice baggageReclaimOfficePassenger = new BaggageReclaimOffice(genInfoRepo); 
+        
         TemporaryStorageArea temporaryStorageArea = new TemporaryStorageArea();
         Porter porter = new Porter((IArraivalLoungePorter) arraivalLounge,(IBaggageCollectionPointPorter) baggageCollectionPoint, (ITemporaryStorageAreaPorter) temporaryStorageArea);
         

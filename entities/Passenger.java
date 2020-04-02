@@ -45,6 +45,16 @@ public class Passenger extends Thread {
     * Interface Passenger Departure Terminal Entrance  
     */
 	private final IDepartureTerminalEntrancePassenger monitorDEP;
+
+	/**
+    * List of Passenger lost bags  
+    */
+	private  ArrayList<Baggage> lostBags;
+	/**
+    * Interface Passenger Baggage Reclaim Office 
+    */
+
+	private final IBaggageReclaimOfficePassenger monitorBRO;
 	/**
     * Array of Passenger bags  
     */
@@ -98,6 +108,7 @@ public class Passenger extends Thread {
 		this.monitorTTQ = monitorTTQ;
 		this.monitorDTTQ = monitorDTTQ;
 		this.monitorDEP = monitorDEP;
+		//this.monitorBRO = monitorBRO;
 		this.end = true;
 	}
 
@@ -169,19 +180,30 @@ public class Passenger extends Thread {
 					System.out.printf("Passenger:%d -> LUGGAGE_COLLECTION_POINT" + "bags=%d \n",this.passengerID , this.bags.length);
 					int idx =0;
 					// passa de array para arraylist. implementaçao mais facil...
-					bagsCollected = Arrays.asList(bags); 
+					bagsCollected = Arrays.asList(bags);
+					lostBags = new ArrayList<Baggage>((Arrays.asList(bags)));
 					while(nbags < bags.length){
 						// ir buscar mala random ? 
-						Baggage baggtoCollect = monitorBc.goCollectABag(idx);
+						Baggage baggtoCollect = monitorBc.goCollectABag(Arrays.asList(bags));
+						
 						if(baggtoCollect == null)
 						{
-							if(nbags<bags.length)
+							if(nbags<bags.length){
+								for (Baggage baggage : bagsCollected) {
+									if(lostBags.contains(baggage))
+										lostBags.remove(baggage);
+									
+								}
+
 								state = PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE;
+							}
+								
 							else
 								state = PassengerEnum.AT_THE_ARRIVAL_TRANSFER_TERMINAL;
 						}
 						if(bagsCollected.contains(baggtoCollect))
 						{
+							lostBags.add(baggtoCollect);
 							nbags++;
 							if(nbags == bags.length)
 								state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
@@ -193,9 +215,11 @@ public class Passenger extends Thread {
 
 
 				case AT_THE_BAGGAGE_RECLAIM_OFFICE:
-					
-					
+					System.out.println("Passenger COMPLAINING!!!!!!!!!!!!!!!!!!!!!!!! " + lostBags.size() + "Lost bags | " + this.passengerID);
+					monitorBRO.complain(lostBags);
+					state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 					break;
+					
 				case AT_THE_ARRIVAL_TRANSFER_TERMINAL:
 					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL WATING FOR BUS \n",this.passengerID);
 					monitorTTQ.takeABus(this.passengerID);

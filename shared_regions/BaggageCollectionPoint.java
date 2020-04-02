@@ -10,15 +10,19 @@ import java.util.concurrent.locks.ReentrantLock;
 import interfaces.*;
 
 import java.util.concurrent.locks.Condition;
+
 public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IBaggageCollectionPointPassenger{
     private final ReentrantLock rl;
     private final Condition waitingBag;
     private List<Baggage> bags;
+    private Boolean noMoreBags = false;
+
 
     public BaggageCollectionPoint(){
         rl = new ReentrantLock(true);
         waitingBag = rl.newCondition();
         bags = new ArrayList<>();
+      
     }
 
     //para sinalizar os passageiros que ja nao ha malas, ou para irem ver 
@@ -27,25 +31,38 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
 	public void carryItToAppropriateStore(Baggage bag) {
         rl.lock();
         try{
-            if(bag == null || bag.getJourneyEnds()){
+            
                 bags.add(bag);
+                noMoreBags = false;
                 waitingBag.signalAll();
-            }
+            
         }catch(Exception ex){
         }finally{
             rl.unlock();
         }
     }
     @Override
-    public Baggage goCollectABag(int idx) {
+    public Baggage goCollectABag(List<Baggage> bagp) {
         rl.lock();
         try {
-            waitingBag.await();
-            if(idx >= this.bags.size()) {
-                return null;
-            }
 
-            return this.bags.get(idx);
+            
+            while(!noMoreBags){
+                System.out.println("BOMDIAAAAAAAAAAAAAAA");
+                for(int i = 0; i < bags.size(); i++) {
+                    for (Baggage baggage : bags) {
+                        if(bagp.contains(baggage)){
+                            
+                            bags.remove(baggage);
+                            return baggage;
+                        }
+                    }
+                }
+                waitingBag.await();
+
+            }
+            return null;
+    
         } catch(Exception ex) {
             return null;
         } finally {
@@ -58,6 +75,7 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
     public void noMoreBagsToCollect() {
         rl.lock();
         try {
+            noMoreBags = true;
             waitingBag.signalAll();
         } catch(Exception ex) {} 
         finally {

@@ -84,7 +84,13 @@ public class AirportRhapsody {
         /**
          * {@link entities.Porter}
          */
-        Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
+
+        /**
+		* {@link shared_regions.DepartureTerminalEntrance}
+        */
+        TemporaryStorageArea temporaryStorageArea = new TemporaryStorageArea();
+        Porter porter = new Porter((IArraivalLoungePorter) arraivalLounge,(IBaggageCollectionPointPorter) baggageCollectionPoint, (ITemporaryStorageAreaPorter) temporaryStorageArea);
+        
         porter.start();
         /**
          * {@link entities.BusDriver}
@@ -106,7 +112,8 @@ public class AirportRhapsody {
                     (IArraivalTerminalExitPassenger) arraivalTerminalExit,
                     (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay,
                     (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay,
-                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance);
+                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance,
+                    (IBaggageReclaimOfficePassenger) baggageReclaimOfficePassenger);
             p[i].start();
             // System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags,
             // p[i]));

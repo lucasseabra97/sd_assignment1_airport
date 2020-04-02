@@ -63,20 +63,34 @@ public class AirportRhapsody {
 		* {@link shared_regions.ArraivalTerminalTransferQuay}
 		*/
         ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(busSize);
+        // Initialize shared region BaggageReclaimOffice
+		/**
+		* {@link shared_regions.BaggageReclaimOffice}
+        */
+        
+        BaggageReclaimOffice baggageReclaimOfficePassenger = new BaggageReclaimOffice(genInfoRepo); 
+        
         // Initialize shared region DepartureTerminalTransferQuay
 		/**
 		* {@link shared_regions.DepartureTerminalTransferQuay}
-		*/
+        */
         DepartureTerminalTransferQuay departureTerminalTransferQuay = new DepartureTerminalTransferQuay();
         // Initialize shared region DepartureTerminalEntrance
 		/**
 		* {@link shared_regions.DepartureTerminalEntrance}
 		*/
         DepartureTerminalEntrance departureTerminalEntrance = new DepartureTerminalEntrance(maxPassengers);
+        
+        /**
+		* {@link shared_regions.DepartureTerminalEntrance}
+        */
+        TemporaryStorageArea temporaryStorageArea = new TemporaryStorageArea();
+        
+        
         /**
 		 *{@link entities.Porter}
 		 */
-        Porter porter = new Porter(arraivalLounge, baggageCollectionPoint);
+        Porter porter = new Porter((IArraivalLoungePorter) arraivalLounge,(IBaggageCollectionPointPorter) baggageCollectionPoint, (ITemporaryStorageAreaPorter) temporaryStorageArea);
         porter.start();
         /**
 		*{@link entities.BusDriver}
@@ -108,7 +122,7 @@ public class AirportRhapsody {
                     (IArraivalTerminalExitPassenger) arraivalTerminalExit,
                     (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay, 
                     (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay, 
-                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance,
+                    (IDepartureTerminalEntrancePassenger) departureTerminalEntrance, (IBaggageReclaimOfficePassenger) baggageReclaimOfficePassenger,
                     jorneyEnds);
             p[i].start();
             //  System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags, p[i]));

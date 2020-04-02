@@ -39,6 +39,8 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	/**
 	 *  General Information Repository
 	 */
+
+	private Random rand;
 	private GeneralRepository rep;
 	/**
     * 
@@ -52,6 +54,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		collectBaggs = false;
 		dayEnded = false;
 		cPorter = rl.newCondition();
+		rand = new Random();
 	}
 
 
@@ -70,8 +73,9 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 			
 			//Thread.sleep(100);
 			for(int i=0;i<bags.length;i++){
-				//System.out.println(bags[i]);
-				this.memBag.add(bags[i]);
+				boolean val = rand.nextInt(75)==0;
+				if(!val)
+					this.memBag.add(bags[i]);
 			}			
 			nPassengers++;
 			if(nPassengers == maxPassengers){
@@ -121,13 +125,22 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	public Baggage tryToCollectABag(){
 		//rep.porterState(PorterEnum.AT_THE_PLANES_HOLD);
 		rl.lock();
-		if(memBag.size() > 0) {
-			
-			//System.out.println(memBag.size());
-            return memBag.remove(0);
+		try{
+			if(memBag.size() > 0) {
+				Baggage tempbagg = memBag.remove(0);
+				//System.out.println(memBag.size());
+				return tempbagg;
+			}
+			else 
+				return null;
 		}
+		catch(Exception ex){
+			return null;
+		}
+		finally{
 		rl.unlock();
-        return null;
+		}
+        
 	}
 
 	@Override 

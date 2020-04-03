@@ -1,12 +1,13 @@
 package interfaces;
 
-import java.util.List;
+import java.util.ArrayList;
+
 
 import commonInfra.*;
 
 
 public interface IBaggageCollectionPointPassenger{
-    Baggage goCollectABag(List<Baggage> ibagp);
+    Baggage goCollectABag(ArrayList<Baggage> ibagp);
     void resetState();
 
 }

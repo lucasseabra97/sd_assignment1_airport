@@ -66,7 +66,7 @@ public class Passenger extends Thread {
 	/**
     * List of bags collected by Passenger 
     */
-	private List<Baggage> bagsCollected;
+	private ArrayList<Baggage> bagsCollected;
 	/**
     * Passenger ID  
     */
@@ -162,7 +162,7 @@ public class Passenger extends Thread {
 		
 	@Override
     public void run() {   
-		Random rand = new Random();
+		
 		for(cFlight = 0;cFlight<numberFlights ;cFlight++){
 			end = true;
 			state = PassengerEnum.AT_THE_DISEMBARKING_ZONE;
@@ -201,10 +201,15 @@ public class Passenger extends Thread {
 					//Enquanto o passageiro tem malas entao vai busca las, no caso de as mesmas nao estarem no collectPoint
 					// entao vai para o ReclaimOffice  
 					System.out.printf("Passenger:%d -> LUGGAGE_COLLECTION_POINT" + "bags=%d \n",this.passengerID , this.bags.length);
-					int idx =0;
+					//int idx =0;
 					// passa de array para arraylist. implementaçao mais facil...
-					bagsCollected = Arrays.asList(bags);
-					lostBags = new ArrayList<Baggage>((Arrays.asList(bags)));
+					//bagsCollected = Arrays.asList(bags);
+					for (Baggage baggage : bags) {
+						bagsCollected.add(baggage);
+					}
+					System.out.println(bagsCollected);
+					
+					//lostBags = new ArrayList<Baggage>((Arrays.asList(bags)));
 					while(bagsCollected.size() >0){
 						// ir buscar mala random ? 
 						Baggage baggtoCollect = monitorBc.goCollectABag(bagsCollected);
@@ -236,8 +241,8 @@ public class Passenger extends Thread {
 					
 				case AT_THE_ARRIVAL_TRANSFER_TERMINAL:
 					System.out.printf("Passenger:%d -> AT THE ARRIVAL TRANSFER TERMINAL WATING FOR BUS \n",this.passengerID);
-					monitorTTQ.takeABus(this.passengerID);
-					monitorTTQ.enterTheBus(this.passengerID);
+					monitorTTQ.takeABus(passengerID);
+					monitorTTQ.enterTheBus(passengerID);
 					System.out.printf("Passenger:%d -> IN THE BUS \n",this.passengerID);
 					state = PassengerEnum.TERMINAL_TRANSFER;
 					break;

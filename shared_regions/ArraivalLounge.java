@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import interfaces.*;
+
+import main.global;
+
 import java.util.Random;
 
 
@@ -37,14 +40,11 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
     * Arraival Lounge determine maxPassengers for Bus
     */
 	private int maxPassengers;
-	/**
-    * Arraival Lounge boolean for Porter collect bags 
-    */
-	private boolean collectBaggs; 
+ 
 	/**
     * Arraival Lounge boolean for end of cycle
     */
-	private boolean dayEnded;
+	private boolean dayEnded=false;
 
 	/**
 	 * Arraival Lounge to collect bag
@@ -55,7 +55,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	 *  General Information Repository
 	 */
 
-	private boolean porterAvailable;
+	private boolean porterAvailable=false;
 
 	 
 	private List<List<Baggage>> bagsPerFlight;
@@ -71,13 +71,12 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		//this.maxPassengers = maxPassengers;
 		this.memBag = new ArrayList<Baggage>();
 		rl = new ReentrantLock(true);
-		collectBaggs = false;
-		dayEnded = false;
+		this.maxPassengers = global.NR_PASSENGERS;
 		cPorter = rl.newCondition();
 		waitForPlane = rl.newCondition();
 		rand = new Random();
 		this.bagsPerFlight = bagsPerFlight;
-		this.porterAvailable = false;
+		
 	}
 
 
@@ -138,7 +137,9 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 
             //repository.porterWaitingLanding();
             while(!collect && !dayEnded) {
-                waitForPlane.await();
+				System.out.println("BOMDIA");
+				waitForPlane.await();
+				
             }
 
             memBag = new ArrayList<>();
@@ -193,7 +194,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
         rl.lock();
         try {
             dayEnded = true;
-            cPorter.signal();
+            waitForPlane.signal();
         } catch(Exception ex) {}
         finally {
             rl.unlock();

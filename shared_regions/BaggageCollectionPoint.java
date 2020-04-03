@@ -42,20 +42,19 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
         }
     }
     @Override
-    public Baggage goCollectABag(List<Baggage> bagp) {
+    public Baggage goCollectABag(ArrayList<Baggage> bagp) {
         rl.lock();
         try {
 
-            
+            System.out.println(bags +"  bomdia "+ bagp);
             while(!noMoreBags){
                 for(int i = 0; i < bags.size(); i++) {
-                    for (Baggage baggage : bags) {
-                        if(bagp.contains(baggage)){
-                            
-                            bags.remove(baggage);
-                            return baggage;
-                        }
+                    Baggage tempbag =bags.get(i);
+                    if(bagp.contains(tempbag)){
+                            bags.remove(tempbag);
+                        return tempbag;
                     }
+                
                 }
                 waitingBag.await();
 

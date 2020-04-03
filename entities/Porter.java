@@ -60,8 +60,9 @@ public class Porter extends Thread{
                     }
                     break;
                 case AT_THE_PLANES_HOLD:    
-                    System.out.println("Porter AT_THE_PLANES_HOLD");
+                    System.out.println("Porter AT_THE_PLANES_HOLD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     bag = monitorAl.tryToCollectABag();
+                    System.out.println("PORTER A CARREGAR " + bag);
                     if(bag == null ){
                         System.out.println("NO MORE BAGS");
                         monitorBCP.noMoreBagsToCollect();

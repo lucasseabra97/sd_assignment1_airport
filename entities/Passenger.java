@@ -87,6 +87,23 @@ public class Passenger extends Thread {
     * Number of Passengers in Departure Terminal Entrance
     */
 	private int npassengersDEP;
+	/**
+     * Destination of passenger for each flight
+     */
+    private Boolean[] flightsDestination;
+	 /**
+     * Current flight
+     */
+	private int cFlight;
+	
+
+	private int numberFlights;
+    /**
+     * Bags of passenger for each flight
+     */
+    private List<List<Baggage>> flightsBags;
+
+
 
 	/**
     * 
@@ -95,10 +112,11 @@ public class Passenger extends Thread {
     * @author João Monteiro 
     * @author Lucas Seabra
     */
-	public Passenger(int passengerID,List<Integer> numBags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP) {
+	public Passenger(int passengerID, Boolean[] flightsDestination, List<List<Baggage>> flightsBags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP,IBaggageReclaimOfficePassenger monitorBRO) {
 		this.passengerID = passengerID;
-		this.numBags = numBags;
+		//this.numBags = numBags;
 		//this.jorneyEnds = jorneyEnds;
+		this.flightsDestination = flightsDestination;
 		this.monitorBc = monitorBc;
 		this.monitorAl = monitorAl;
 		this.state = PassengerEnum.AT_THE_DISEMBARKING_ZONE;	
@@ -108,8 +126,10 @@ public class Passenger extends Thread {
 		this.monitorTTQ = monitorTTQ;
 		this.monitorDTTQ = monitorDTTQ;
 		this.monitorDEP = monitorDEP;
-		//this.monitorBRO = monitorBRO;
+		this.monitorBRO = monitorBRO;
 		this.end = true;
+		this.flightsBags = flightsBags;
+		this.numberFlights = global.NR_FLIGHTS;
 	}
 
 	public boolean isJorneyEnds() {
@@ -142,36 +162,39 @@ public class Passenger extends Thread {
 		
 	@Override
     public void run() {   
-		Random rand;
-		for (int i = 0; i < global.NR_FLIGHTS; i++) {
-			//random nbags gerados para cada passageiro 
-			rand = new Random();	
-			boolean jorneyEnds = rand.nextBoolean();
-			bags = new Baggage[numBags.get(i)];
-			//a ideia e para cada passageiro atualizar a info da mala associada ao mesmo pq 
-			//se o passageiro id0 tiver 2 malas entao a mala 0 e 1 tem associadas a si o passageiro id0 
-			//e o estado do mesmo para que o porter, após todos cheguarem possa decidir onde colocar as malas
-			for(int b=0;b<bags.length;b++){
-				//i => id
-				bags[b] = new Baggage(i,jorneyEnds);
-				//System.out.println(bags[b]);
-			}
-		}
-        while (end){
+		Random rand = new Random();
+		for(cFlight = 0;cFlight<numberFlights ;cFlight++){
+			end = true;
+			state = PassengerEnum.AT_THE_DISEMBARKING_ZONE;
+			while (end){
             switch(state){
 				case AT_THE_DISEMBARKING_ZONE:
-					System.out.printf("Passenger:%d -> waiting AT_THE_DISEMBARKING_ZONE with : %d bags and jouneyEnds:%b \n",this.passengerID,bags.length,this.jorneyEnds);
-					action = this.monitorAl.whatShouldIDO(this.passengerID,this.bags, this.jorneyEnds);
-					if(action == PassengerAction.goHome){
-						state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
-					}	
-					else if(action == PassengerAction.collecBag){
-						state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
-					}	
+					
+					//action = this.monitorAl.whatShouldIDO(this.passengerID,this.bags, this.jorneyEnds);
+					Boolean goHome = flightsDestination[cFlight] == true;
+					bags = new Baggage[flightsBags.get(cFlight).size()];
+					for(int i = 0; i < bags.length; i++) {
+						bags[i] = flightsBags.get(cFlight).get(i);
+					}
+					//falta mexer no ArrailvalLounge
+					if(monitorAl.whatShouldIDO(goHome) == 1) 
+						monitorBc.resetState();
+						
+					System.out.println("PASSAGEIRO CHEGOU COM " + bags.length + " MALAS");
+					
+					if(goHome){
+						if(bags.length >0){
+							state = PassengerEnum.AT_THE_LUGGAGE_COLLECTION_POINT;
+						}
+						else{
+							state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
+						}
+
+					}
 					else{
 						state = PassengerEnum.AT_THE_ARRIVAL_TRANSFER_TERMINAL;
 					}
-					// else if(this.monitorAl.whatShouldIDO(this.bags, this.jorneyEnds)== PassengerAction.takeABus)
+					
 						
 					break;
 				case AT_THE_LUGGAGE_COLLECTION_POINT:
@@ -182,40 +205,31 @@ public class Passenger extends Thread {
 					// passa de array para arraylist. implementaçao mais facil...
 					bagsCollected = Arrays.asList(bags);
 					lostBags = new ArrayList<Baggage>((Arrays.asList(bags)));
-					while(nbags < bags.length){
+					while(bagsCollected.size() >0){
 						// ir buscar mala random ? 
-						Baggage baggtoCollect = monitorBc.goCollectABag(Arrays.asList(bags));
+						Baggage baggtoCollect = monitorBc.goCollectABag(bagsCollected);
 						
 						if(baggtoCollect == null)
 						{
-							if(nbags<bags.length){
-								for (Baggage baggage : bagsCollected) {
-									if(lostBags.contains(baggage))
-										lostBags.remove(baggage);
-									
-								}
-
-								state = PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE;
-							}
-								
+							if(bagsCollected.size() >0)
+								state =PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE;
 							else
 								state = PassengerEnum.AT_THE_ARRIVAL_TRANSFER_TERMINAL;
+							break;
 						}
 						if(bagsCollected.contains(baggtoCollect))
 						{
-							lostBags.add(baggtoCollect);
-							nbags++;
-							if(nbags == bags.length)
-								state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
-						
+							bagsCollected.remove(baggtoCollect);
+							state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
+
 						}
-						idx ++;	
 					}
+					
 					break;
 
 
 				case AT_THE_BAGGAGE_RECLAIM_OFFICE:
-					System.out.println("Passenger COMPLAINING!!!!!!!!!!!!!!!!!!!!!!!! " + lostBags.size() + "Lost bags | " + this.passengerID);
+					System.out.println("Passenger COMPLAINING " + lostBags.size() + "Lost bags | " + this.passengerID);
 					monitorBRO.complain(lostBags);
 					state = PassengerEnum.EXITING_THE_ARRIVAL_TERMINAL;
 					break;
@@ -246,6 +260,10 @@ public class Passenger extends Thread {
 					if(monitorDEP.prepareNextLeg(npassengersDEP)){
 						monitorAe.awakePassengers();
 						monitorDEP.awakePassengers();
+						if(cFlight == numberFlights - 1) {
+							monitorAl.endOfDay();
+							monitorTTQ.endOfDay();
+						}
 						
 					}
 					
@@ -258,6 +276,10 @@ public class Passenger extends Thread {
 					if(monitorAe.goHome(npassengersAe)){
 						monitorAe.awakePassengers();
 						monitorDEP.awakePassengers();
+						if(cFlight == numberFlights - 1) {
+							monitorAl.endOfDay();
+							monitorTTQ.endOfDay();
+						}
 						
 					}
 					end = false;
@@ -272,7 +294,9 @@ public class Passenger extends Thread {
 			} catch (Exception e) {}
 			
         }
-		System.out.println("Passenger Ended : "+this.toString());
+		System.out.println("passageiro a reinicar estado");
+		}
+		System.out.println("Passenger Ended  ");
 	}
 
 	@Override

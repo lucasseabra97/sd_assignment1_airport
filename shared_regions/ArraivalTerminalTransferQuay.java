@@ -172,7 +172,7 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     }
     
 
-   
+    @Override
     public Boolean endOfDay() {
         rl.lock();
         try {

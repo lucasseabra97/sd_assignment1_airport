@@ -1,25 +1,34 @@
 package shared_regions;
+
 import commonInfra.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.ArrayList;
+import java.util.List;
+
 import interfaces.*;
 import java.util.Random;
 
 
-public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter,IOpArrivalLounge{
+public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter{
 	/**
     * Arraival Lounge Variable for locking 
 	*/
 	private final ReentrantLock rl;
+
 	/**
     * Arraival Lounge Memory for all baggages
     */
 	private ArrayList<Baggage> memBag;
 	/**
-    * Arraival Lounge Conditional variable for waking up porter
+    * Arraival Lounge Conditional variable for waiting for porter
     */
 	private final Condition cPorter;
+
+	/**
+    * Arraival Lounge Conditional variable for waiting for plane
+    */
+	private final Condition waitForPlane;
 	/**
     * Arraival Lounge variable to count Passengers
     */
@@ -36,9 +45,20 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
     * Arraival Lounge boolean for end of cycle
     */
 	private boolean dayEnded;
+
+	/**
+	 * Arraival Lounge to collect bag
+	 * 
+	 */
+	private boolean collect = false;
 	/**
 	 *  General Information Repository
 	 */
+
+	private boolean porterAvailable;
+
+	 
+	private List<List<Baggage>> bagsPerFlight;
 
 	private Random rand;
 	private GeneralRepository rep;
@@ -47,14 +67,17 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	*  	Arraival Lounge shared Mem.
     * 	@param maxPassengers
     */
-	public ArraivalLounge(int maxPassengers) {
-		this.maxPassengers = maxPassengers;
+	public ArraivalLounge( List<List<Baggage>> bagsPerFlight) {
+		//this.maxPassengers = maxPassengers;
 		this.memBag = new ArrayList<Baggage>();
 		rl = new ReentrantLock(true);
 		collectBaggs = false;
 		dayEnded = false;
 		cPorter = rl.newCondition();
+		waitForPlane = rl.newCondition();
 		rand = new Random();
+		this.bagsPerFlight = bagsPerFlight;
+		this.porterAvailable = false;
 	}
 
 
@@ -65,57 +88,79 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	 * @param jorneyEnds
 	 * @return PassengerAction
 	 */
+
+
 	@Override
-	public PassengerAction whatShouldIDO(int passengerID,Baggage[] bags,boolean jorneyEnds) {
-		rl.lock();
+    public int whatShouldIDO(Boolean goHome) {
+        rl.lock();
         try {
-			//rep.passengerState(passengerID, PassengerEnum.AT_THE_DISEMBARKING_ZONE, jorneyEnds, bags.length);
-			
-			//Thread.sleep(100);
-			for(int i=0;i<bags.length;i++){
-				boolean val = rand.nextInt(75)==0;
-				if(!val)
-					this.memBag.add(bags[i]);
-			}			
-			nPassengers++;
-			if(nPassengers == maxPassengers){
-				//System.out.printf("total bags = %d \n",this.memBag.size());
-				//System.out.println(nPassengers);
-				collectBaggs=true;
-				cPorter.signal();	
-				nPassengers =0;	
-			}
-        } catch (Exception ex) {}
-        finally {
+
+            // if(goHome) repository.addFinalDestinations();
+            // else repository.addTransit();
+
+            while(!porterAvailable)
+                cPorter.await();
+
+            nPassengers++;
+           // if(nPassengers == 1) repository.startNextFlight(bagsPerFlight.get(0).size());
+
+            //Passenger passenger = (Passenger) Thread.currentThread();
+            //int bags = passenger.getFlightBags();
+            //repository.passengerInit(PassengerEnum.AT_THE_DISEMBARKING_ZONE, bags, goHome ? "FDT" : "TRF", passenger.getPassengerId());
+
+            if(nPassengers == maxPassengers) {
+                collect = true;
+                nPassengers = 0;
+                waitForPlane.signal();
+            }
+
+            return nPassengers;
+            
+        } catch(Exception ex) {  
+            return 0;   
+        } finally {
             rl.unlock();
-		}
-		if(jorneyEnds)
-			return bags.length ==0 ? PassengerAction.goHome : PassengerAction.collecBag;
-		return PassengerAction.takeABus;
-	}
+        }
+    }
+
 	/**
 	 * Porter in {@link commonInfra.PorterEnum.WAITING_FOR_A_PLANE_TO_LAND} state
 	 * @return dayEnded
 	 * 
 	 */	
 	@Override
-	public  boolean takeARest(){
-		rl.lock();
-		try{
+    public boolean takeARest() {
+        rl.lock();
+        try {
 
-			//rep.porterState(PorterEnum.WAITING_FOR_A_PLANE_TO_LAND);
-			if(dayEnded)
-                return false;
-            cPorter.await();
+            porterAvailable = true;
+            cPorter.signalAll();
+
+            //repository.porterWaitingLanding();
+            while(!collect && !dayEnded) {
+                waitForPlane.await();
+            }
+
+            memBag = new ArrayList<>();
+            if(!dayEnded){
+                List<Baggage> flightBags = bagsPerFlight.remove(0);
+                for(int b = 0; b < flightBags.size(); b++) {
+                    memBag.add(flightBags.get(b));
+                    //repository.addBag();
+                   
+                }
+            }
+            
+            porterAvailable = false;
+            collect = false;
             return !dayEnded;
-		
-		}catch(Exception ex){
-			return true;
-		}
-		finally{
-			rl.unlock();
-		}
-	}
+
+        } catch(Exception ex) {  
+            return true;  
+        } finally {
+            rl.unlock();
+        }
+    }
 	/**
 	 * Porter in {@link  commonInfra.PorterEnum.AT_THE_PLANES_HOLDWAITING_FOR_PLANE_TO_LAND} state
 	 * @return bag

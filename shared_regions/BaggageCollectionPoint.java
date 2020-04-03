@@ -48,7 +48,6 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
 
             
             while(!noMoreBags){
-                System.out.println("BOMDIAAAAAAAAAAAAAAA");
                 for(int i = 0; i < bags.size(); i++) {
                     for (Baggage baggage : bags) {
                         if(bagp.contains(baggage)){
@@ -70,7 +69,6 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
         }
     }
 
-    
     @Override
     public void noMoreBagsToCollect() {
         rl.lock();
@@ -79,6 +77,18 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
             waitingBag.signalAll();
         } catch(Exception ex) {} 
         finally {
+            rl.unlock();
+        }
+    }
+
+
+    @Override
+    public void resetState() {
+        rl.lock();
+        try {
+            noMoreBags = false;
+        } catch(Exception ex) {
+        } finally {
             rl.unlock();
         }
     }

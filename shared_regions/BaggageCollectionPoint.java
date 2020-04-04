@@ -46,7 +46,7 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
         rl.lock();
         try {
 
-            System.out.println(bags +"  bomdia "+ bagp);
+            //System.out.println(bags +"  bomdia "+ bagp);
             while(!noMoreBags){
                 for(int i = 0; i < bags.size(); i++) {
                     Baggage tempbag =bags.get(i);

@@ -4,6 +4,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import interfaces.IDepartureTerminalEntrancePassenger;
+import main.global;
 
 public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePassenger{
     /**
@@ -37,7 +38,7 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     public DepartureTerminalEntrance(int nrPassengers) {
         rl = new ReentrantLock(true);
         waitingEnd = rl.newCondition();
-        this.nrPassengers = nrPassengers;
+        this.nrPassengers = global.NR_PASSENGERS;
         this.goingHome = false;
     }
 

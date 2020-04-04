@@ -137,7 +137,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 
             //repository.porterWaitingLanding();
             while(!collect && !dayEnded) {
-				System.out.println("BOMDIA");
+				//System.out.println("BOMDIA");
 				waitForPlane.await();
 				
             }

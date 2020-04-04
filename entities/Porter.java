@@ -50,7 +50,7 @@ public class Porter extends Thread{
         while(end){
             switch(state){
                 case WAITING_FOR_A_PLANE_TO_LAND:
-                    System.out.println("Porter waiting for a plain to land...");
+                    System.out.println("Porter -> waiting for a plain to land...");
                     
                     if (monitorAl.takeARest())
                         state = PorterEnum.AT_THE_PLANES_HOLD;
@@ -60,11 +60,11 @@ public class Porter extends Thread{
                     }
                     break;
                 case AT_THE_PLANES_HOLD:    
-                    System.out.println("Porter AT_THE_PLANES_HOLD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    System.out.println("Porter -> AT_THE_PLANES_HOLD... ");
                     bag = monitorAl.tryToCollectABag();
-                    System.out.println("PORTER A CARREGAR " + bag);
+                    System.out.println("Porter carring " + bag);
                     if(bag == null ){
-                        System.out.println("NO MORE BAGS");
+                        System.out.println("No more Bags to Collect .");
                         monitorBCP.noMoreBagsToCollect();
                         state =PorterEnum.WAITING_FOR_A_PLANE_TO_LAND;
                        
@@ -78,12 +78,12 @@ public class Porter extends Thread{
                     }   
                     break;
                 case AT_THE_LUGGAGE_BELT_CONVEYOR:
-                    System.out.println("PORTEIRO A CARREGAR MALA PARA A MESA: " + bag);
+                    System.out.println("Porter -> AT_THE_LUGGAGE_BELT_CONVEYOR | carring bag to table: " + bag);
                     monitorBCP.carryItToAppropriateStore(bag);
                     state = PorterEnum.AT_THE_PLANES_HOLD;
                     break;
                 case AT_THE_STOREROOM:
-                    System.out.println("PORTEIRO A CARREGAR MALA PARA ESPAÇO TEMPORARIO: " + bag);
+                    System.out.println("PORTEIRO -> AT_THE_STOREROOM | carring bag to temporary space: " + bag);
                     monitorTSA.carryItToAppropriateStore(bag);
                     state = PorterEnum.AT_THE_PLANES_HOLD;
                     break;

@@ -1,5 +1,7 @@
 package shared_regions;
 import interfaces.IArraivalTerminalExitPassenger;
+import main.global;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,7 +35,7 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     public ArraivalTerminalExit(int nrPassengers) {
         rl = new ReentrantLock(true);
         waitingEnd = rl.newCondition();
-        this.nrPassengers = nrPassengers;
+        this.nrPassengers = global.NR_PASSENGERS;
         this.goingHome = false;
     }
 

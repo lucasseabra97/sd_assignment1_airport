@@ -50,7 +50,7 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     public void syncPassenger(){
         rl.lock();
         try{
-            
+            goingHome = true;
             passengers ++;
 
         }catch(Exception ex){}
@@ -84,8 +84,8 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     public int nPassengersDepartureTEntrance(){
         rl.lock();
         try {
-            return passengers;
-        } catch (Exception e) {  return passengers;      }
+            return this.passengers;
+        } catch (Exception e) {  return passengers;}
         finally{
             rl.unlock();
         }

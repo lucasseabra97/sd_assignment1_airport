@@ -23,18 +23,28 @@ public class AirportRhapsody {
 
         System.out.println("----------AirportRhapsody---------");
         final Random random = new Random();
-        // final int nrPassengers = 6;
-        // final int busSize = 3;
-        // final int maxBags = 3;
-        // final int fligths=5;
+       
 
         List<List<Baggage>> bagsPerFlight = new ArrayList<>(global.NR_FLIGHTS);
         Boolean[][] passengersDestination = new Boolean [global.NR_PASSENGERS][global.NR_FLIGHTS];
         List<List<List<Baggage>>> passengersBags = new ArrayList<>(global.NR_PASSENGERS);
 
 
-        File log = new File("log.txt");
-        GeneralRepository genInfoRepo = new GeneralRepository(log);
+
+        
+
+        File logger = new File("logger.txt");
+		if(logger.createNewFile()){
+			//System.out.println("Logger created: " + logger.getName());
+        }
+        else{
+			logger.delete();
+			logger.createNewFile();
+			// System.out.println("File already exists.");
+
+		}
+
+        GeneralRepository genInfoRepo = new GeneralRepository(logger);
         /**
          * {@link entities.Passenger}
          */
@@ -44,32 +54,32 @@ public class AirportRhapsody {
         /**
          * {@link shared_regions.ArraivalLounge}
          */
-        ArraivalLounge arraivalLounge = new ArraivalLounge(bagsPerFlight);
+        ArraivalLounge arraivalLounge = new ArraivalLounge(bagsPerFlight,genInfoRepo);
         // Initialize shared region BaggageCollectionPoint
         /**
          * {@link shared_regions.BaggageCollectionPoint}
          */
-        BaggageCollectionPoint baggageCollectionPoint = new BaggageCollectionPoint();
+        BaggageCollectionPoint baggageCollectionPoint = new BaggageCollectionPoint(genInfoRepo);
         // Initialize shared region ArraivalTerminalExit
         /**
          * {@link shared_regions.ArraivalTerminalExit}
          */
-        ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(global.NR_PASSENGERS);
+        ArraivalTerminalExit arraivalTerminalExit = new ArraivalTerminalExit(global.NR_PASSENGERS,genInfoRepo);
         // Initialize shared region ArraivalTerminalTransferQuay
         /**
          * {@link shared_regions.ArraivalTerminalTransferQuay}
          */
-        ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(global.BUS_SIZE);
+        ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(global.BUS_SIZE,genInfoRepo);
         // Initialize shared region DepartureTerminalTransferQuay
         /**
          * {@link shared_regions.DepartureTerminalTransferQuay}
          */
-        DepartureTerminalTransferQuay departureTerminalTransferQuay = new DepartureTerminalTransferQuay();
+        DepartureTerminalTransferQuay departureTerminalTransferQuay = new DepartureTerminalTransferQuay(genInfoRepo);
         // Initialize shared region DepartureTerminalEntrance
         /**
          * {@link shared_regions.DepartureTerminalEntrance}
          */
-        DepartureTerminalEntrance departureTerminalEntrance = new DepartureTerminalEntrance(global.NR_PASSENGERS);
+        DepartureTerminalEntrance departureTerminalEntrance = new DepartureTerminalEntrance(global.NR_PASSENGERS,genInfoRepo);
         /**
          * {@link entities.Porter}
          */
@@ -78,7 +88,7 @@ public class AirportRhapsody {
         */
         BaggageReclaimOffice baggageReclaimOfficePassenger = new BaggageReclaimOffice(genInfoRepo); 
 
-        TemporaryStorageArea temporaryStorageArea = new TemporaryStorageArea();
+        TemporaryStorageArea temporaryStorageArea = new TemporaryStorageArea(genInfoRepo);
         
         
         Porter porter = new Porter((IArraivalLoungePorter) arraivalLounge,(IBaggageCollectionPointPorter) baggageCollectionPoint, (ITemporaryStorageAreaPorter) temporaryStorageArea); 
@@ -139,18 +149,6 @@ public class AirportRhapsody {
             
         } 
 
-        // array de bags é passado como argumento pq ajuda o porter a remove las
-        // p[i] = new Passenger(i, bags.get(i), (IArraivalLoungePassenger) arraivalLounge,
-        //         (IBaggageCollectionPointPassenger) baggageCollectionPoint,
-        //         (IArraivalTerminalExitPassenger) arraivalTerminalExit,
-        //         (IArraivalTerminalTransferQPassenger) arraivalTerminalTransferQuay,
-        //         (IDepartureTerminalTransferQPassenger) departureTerminalTransferQuay,
-        //         (IDepartureTerminalEntrancePassenger) departureTerminalEntrance,
-        //         (IBaggageReclaimOfficePassenger) baggageReclaimOfficePassenger);
-        // p[i].start();
-        // System.out.println(String.format("Passageiro gerado com %d malas: %s", nBags,
-        // p[i]));
-      
 
         try {
             porter.join();
@@ -160,7 +158,9 @@ public class AirportRhapsody {
                 passengers[i].join();
             }
         } catch (Exception e) {
-
+            
+        }finally{
+            genInfoRepo.close();
         }
 
     }

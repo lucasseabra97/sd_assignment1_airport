@@ -126,7 +126,10 @@ public class GeneralRepository{
      * flights count
      */
     private int flight;
-
+    /**
+     * max number of passengers
+     */
+    private int maxPassengers;
     /**
      *  reentrant lock
      */
@@ -135,22 +138,21 @@ public class GeneralRepository{
      */
     private String[] passengerCollectedLuggage;
     private ReentrantLock rl;
-    /**
-     * Total number of bags that passed by the planes'hold.
-     */
-    private int bn_total;
-
+    
     // Abbreviations of the porter and driver states, in order
-    private  String porterStates ;
-    private  String bDriverStates ;
+    private String porterStates;
+    private String bDriverStates;
+
+
+
     public GeneralRepository(File logger) {
         this.logger = logger;
-        
-         String header = "               AIRPORT RHAPSODY - Description of the internal state of the problem";
-         String s1 = "PLANE    PORTER                  DRIVER";
-         String s2 = "FN BN  Stat CB SR   Stat  Q1 Q2 Q3 Q4 Q5 Q6  S1 S2 S3";
-         String s3 = "                                                         PASSENGERS";
-         String s4 = "St1 Si1 NR1 NA1 St2 Si2 NR2 NA2 St3 Si3 NR3 NA3 St4 Si4 NR4 NA4 St5 Si5 NR5 NA5 St6 Si6 NR6 NA6";
+        this.maxPassengers = global.NR_PASSENGERS;
+        String header = "               AIRPORT RHAPSODY - Description of the internal state of the problem";
+        String s1 = "PLANE    PORTER                  DRIVER";
+        String s2 = "FN BN  Stat CB SR   Stat  Q1 Q2 Q3 Q4 Q5 Q6  S1 S2 S3";
+        String s3 = "                                                         PASSENGERS";
+        String s4 = "St1 Si1 NR1 NA1 St2 Si2 NR2 NA2 St3 Si3 NR3 NA3 St4 Si4 NR4 NA4 St5 Si5 NR5 NA5 St6 Si6 NR6 NA6";
         this.rl = new ReentrantLock(true);
         this.conveyorLuggage =0;
         initializeLogger(header);
@@ -309,7 +311,7 @@ public class GeneralRepository{
     public void driverParkingArrivalTerminal() {
         rl.lock();
         try{
-            if(!bDriverState.equals("PKAT")){
+            if(!bDriverStates.equals("PKAT")){
                 busdriverState(BusDriverEnum.PARKING_AT_THE_ARRIVAL_TERMINAL);
                 write();
             }
@@ -326,7 +328,7 @@ public class GeneralRepository{
   
         rl.lock();
         try{
-            if(!bDriverState.equals("PKDT")){
+            if(!bDriverStates.equals("PKDT")){
                 busdriverState(BusDriverEnum.PARKING_AT_THE_DEPARTURE_TERMINAL);
                 write();
             }
@@ -342,7 +344,7 @@ public class GeneralRepository{
     public void driverDrivingForward() {
         rl.lock();
         try{
-            if(!bDriverState.equals("DRFW")){
+            if(!bDriverStates.equals("DRFW")){
                 busdriverState(BusDriverEnum.DRIVING_FORWARD);
                 write();
             }
@@ -358,7 +360,7 @@ public class GeneralRepository{
     public void driverDrivingBackward() {
         rl.lock();
         try{
-            if(!bDriverState.equals("DRBW")){
+            if(!bDriverStates.equals("DRBW")){
                 busdriverState(BusDriverEnum.DRIVING_BACKWARD);
                 write();
             }
@@ -376,7 +378,7 @@ public class GeneralRepository{
     public void porterWaitingLanding() {
         rl.lock();
         try{
-            if(!porterState.equals("WPTL")){
+            if(!porterStates.equals("WPTL")){
                 porterState(PorterEnum.WAITING_FOR_A_PLANE_TO_LAND);
                 write();
             }
@@ -392,7 +394,7 @@ public class GeneralRepository{
     public void porterNoMoreBags() {
         rl.lock();
         try{
-            if(!porterState.equals("APLH")){
+            if(!porterStates.equals("APLH")){
                 porterState(PorterEnum.AT_THE_PLANES_HOLD);
                 write();
             }
@@ -712,38 +714,61 @@ public class GeneralRepository{
         }
     }
 
-    private void updateStatePorterOrBDriver(){
-        String info1 = " " + this.fn + "  " + this.bn[this.fn] + "  " + porterStates[this.porterState.ordinal()] + "  " + this.cb + "  " + this.sr[this.fn]  + "   " 
-                           + bDriverStates[this.bDriverState.ordinal()] + "   " 
-                           + this.q[0] + "  " + this.q[1] + "  " + this.q[2] + "  " + this.q[3] + "  " + this.q[4] + "  " + this.q[5] + "  " 
-                           + this.s[0] + "  " + this.s[1] + "  " + this.s[2];
-        String info2 = "";
-        String tmp;
-        for(int i = 0; i < 6; i++){
-            tmp = "";
-            if(this.passengerState[i] == null) tmp = "--- ---  -   -";
-            else{
-                tmp = passengerStates[this.passengerState[i].ordinal()] + " " + this.passengerDest[i] + "  " + this.nr[i] + "   " + this.na[i];
+    // private void updateStatePorterOrBDriver(){
+    //     String info1 = " " + this.fn + "  " + this.bn[this.fn] + "  " + porterStates[this.porterState.ordinal()] + "  " + this.cb + "  " + this.sr[this.fn]  + "   " 
+    //                        + bDriverStates[this.bDriverState.ordinal()] + "   " 
+    //                        + this.q[0] + "  " + this.q[1] + "  " + this.q[2] + "  " + this.q[3] + "  " + this.q[4] + "  " + this.q[5] + "  " 
+    //                        + this.s[0] + "  " + this.s[1] + "  " + this.s[2];
+    //     String info2 = "";
+    //     String tmp;
+    //     for(int i = 0; i < 6; i++){
+    //         tmp = "";
+    //         if(this.passengerState[i] == null) tmp = "--- ---  -   -";
+    //         else{
+    //             tmp = passengerStates[this.passengerState[i].ordinal()] + " " + this.passengerDest[i] + "  " + this.nr[i] + "   " + this.na[i];
+    //         }
+    //         info2 += tmp + "  ";
+    //     }
+    //     writeToLogger(info1);
+    //     writeToLogger(info2);
+    // }
+
+    
+    /**
+     * Writes an update to the log file.
+     * @throws IOException
+     */
+    private void write() throws IOException{
+        rl.lock();
+        FileWriter fw = null;
+        try{
+            fw = new FileWriter(logger, true); // Append
+            String busQueue_Seats = "";
+            for(int i=0; i<queue.length; i++) {
+                busQueue_Seats += queue[i] + "  ";
             }
-            info2 += tmp + "  ";
+            busQueue_Seats += " ";
+            for(int i=0; i<seats.length; i++) {
+                busQueue_Seats += seats[i] + "  ";
+            }
+            busQueue_Seats += "\n";
+            String line1 = " " + Integer.toString(flight) + " " + Integer.toString(flightLuggage) + "   " + porterStates.toString()
+                           + "  " + Integer.toString(conveyorLuggage) + "  " + Integer.toString(storeroomLuggage) +  "   "
+                           + bDriverStates.toString() + "   " + busQueue_Seats;
+            fw.write(line1);
+
+            String line2 = "";
+            for(int i=0; i<maxPassengers; i++){
+                line2 += passengerStates[i] + " " + passengerSituation[i] + "  " + passengerLuggage[i] + "   " + passengerCollectedLuggage[i] + "  ";
+            } 
+            line2 += "\n";
+            fw.write(line2);
+
+        }catch(Exception e){}
+        finally{
+            fw.close();
+            rl.unlock();
         }
-        writeToLogger(info1);
-        writeToLogger(info2);
-    }
-
-    void writeToLogger( String toWrite){
-        assert toWrite != null : "ERROR: nothing to update!";
-
-        try {
-            FileWriter myWriter = new FileWriter(this.logger, true);
-            myWriter.write(toWrite + '\n');
-            myWriter.close();
-        } catch ( IOException e) {
-            System.out.println("Thread: " + Thread.currentThread().getName() + " terminated.");
-			System.out.println("Error: " + e.getMessage());
-			System.exit(1);
-        } 
-
     }
 
     void initializeLogger(String toWrite){
@@ -759,6 +784,30 @@ public class GeneralRepository{
 			System.exit(1);
         } 
 
+    }
+
+
+
+    /**
+     * Writes the final report to the log file and closes it.
+     * @throws IOException
+     */
+    public void close() throws IOException{
+        rl.lock();
+        FileWriter fw = null;
+        try{
+            fw = new FileWriter(logger, true); // Append
+            fw.write("\nFinal Report\n");
+            fw.write("N. of passengers which have this airport as their final destination = " + finalDestinations + "\n");
+            fw.write("N. of passengers which are in transit = " + transit + "\n");
+            fw.write("N. of bags that should have been transported in the the planes hold = " + bags + "\n");
+            fw.write("N. of bags that were lost = " + lostBags + "\n");
+            fw.close();
+        }catch(Exception e){}
+        finally{
+            fw.close();
+            rl.unlock();
+        }
     }
 
 }

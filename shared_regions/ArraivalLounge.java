@@ -1,6 +1,8 @@
 package shared_regions;
 
 import commonInfra.*;
+import entities.Passenger;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.ArrayList;
@@ -9,9 +11,6 @@ import java.util.List;
 import interfaces.*;
 
 import main.global;
-
-import java.util.Random;
-
 
 public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter{
 	/**
@@ -60,21 +59,23 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	 
 	private List<List<Baggage>> bagsPerFlight;
 
-	private Random rand;
-	private GeneralRepository rep;
+	/**
+     * The general repository of information.
+     */
+  
+	private final GeneralRepository rep;
 	/**
     * 
 	*  	Arraival Lounge shared Mem.
     * 	@param maxPassengers
     */
-	public ArraivalLounge( List<List<Baggage>> bagsPerFlight , GeneralRepository reo) {
+	public ArraivalLounge( List<List<Baggage>> bagsPerFlight , GeneralRepository rep) {
 		//this.maxPassengers = maxPassengers;
 		this.memBag = new ArrayList<Baggage>();
 		rl = new ReentrantLock(true);
 		this.maxPassengers = global.NR_PASSENGERS;
 		cPorter = rl.newCondition();
 		waitForPlane = rl.newCondition();
-		rand = new Random();
 		this.bagsPerFlight = bagsPerFlight;
 		this.rep = rep;
 		
@@ -94,19 +95,27 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
     public int whatShouldIDO(Boolean goHome) {
         rl.lock();
         try {
-
-			if(goHome) rep.addFinalDestinations();
-            else rep.addTransit();
-
-            while(!porterAvailable)
+			Passenger passenger = (Passenger) Thread.currentThread();
+			int bags = passenger.getFlightBags();
+			
+			if(goHome){
+				rep.addFinalDestinations();
+			}
+            else {
+				rep.addTransit();
+			}
+            while(!porterAvailable){
                 cPorter.await();
-
+			}
             nPassengers++;
-           // if(nPassengers == 1) repository.startNextFlight(bagsPerFlight.get(0).size());
+		   
+			if(nPassengers == 1){
+				rep.startNextFlight(bagsPerFlight.get(0).size());
+			} 
 
-            //Passenger passenger = (Passenger) Thread.currentThread();
-            //int bags = passenger.getFlightBags();
-            //repository.passengerInit(PassengerEnum.AT_THE_DISEMBARKING_ZONE, bags, goHome ? "FDT" : "TRF", passenger.getPassengerId());
+            
+            rep.passengerInit(PassengerEnum.AT_THE_DISEMBARKING_ZONE, bags, goHome ? "FDT" : "TRF", passenger.getPassengerID());
+
 
             if(nPassengers == maxPassengers) {
                 collect = true;

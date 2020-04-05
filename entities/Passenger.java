@@ -80,6 +80,14 @@ public class Passenger extends Thread {
     */
 	private boolean end;
 	/**
+    * Number of Passengers in Arrival terminal Exit
+    */
+	private int npassengersAe;
+	/**
+    * Number of Passengers in Departure Terminal Entrance
+    */
+	private int npassengersDEP;
+	/**
      * Destination of passenger for each flight
      */
     private Boolean[] flightsDestination;
@@ -136,13 +144,13 @@ public class Passenger extends Thread {
 		this.jorneyEnds = jorneyEnds;
 	}
 
-	// public Baggage[] getBags() {
-	// 	return this.bags;
-	// }
-
-	// public void setBags(Baggage[] bags) {
-	// 	this.bags = bags;
-	// }
+	 /**
+     * Getter for the current flight bags.
+     * @return The current flight bags.
+     */
+    public int getFlightBags() {
+        return flightsBags.get(cFlight).size();
+    }
 
 	public int getPassengerID() {
 		return this.passengerID;
@@ -252,41 +260,39 @@ public class Passenger extends Thread {
 						state = PassengerEnum.ENTERING_THE_DEPARTURE_TERMINAL;
 						break;
 					case ENTERING_THE_DEPARTURE_TERMINAL:
+						System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT \n",this.passengerID);
+						monitorDEP.syncPassenger();
+						int npassDEP = monitorAe.nPassengersDepartureAT();
+				
+						if(monitorDEP.prepareNextLeg(npassDEP)){
+							monitorAe.awakePassengers();
+							//monitorDEP.awakePassengers();
+							if(cFlight == numberFlights - 1) {
+								monitorAl.endOfDay();
+								monitorTTQ.endOfDay();
+							}
+							
+						}						
+						end = false;
+						break ;
 
-					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT \n",this.passengerID);
-					
-					monitorDEP.syncPassenger();
-					int npassengersAE =monitorAe.nPassengersDepartureAT();
-					if(monitorDEP.prepareNextLeg(npassengersAE)){
-						monitorAe.awakePassengers();
-						if(cFlight == numberFlights - 1) {
-							monitorAl.endOfDay();
-							monitorTTQ.endOfDay();
-						}
-						
-					}
-					
-					end = false;
-					break ;
-				case EXITING_THE_ARRIVAL_TERMINAL:
-					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL \n",this.passengerID);
-					
-					monitorAe.syncPassenger();
-					int npassengersDEP = monitorDEP.nPassengersDepartureTEntrance();
-					
-					if(monitorAe.goHome(npassengersDEP)){
-						monitorDEP.awakePassengers();
-						if(cFlight == numberFlights - 1) {
-							monitorAl.endOfDay();
-							monitorTTQ.endOfDay();
+					case EXITING_THE_ARRIVAL_TERMINAL:
+						System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL \n",this.passengerID);
+						int goingHome = monitorDEP.nPassengersDepartureTEntrance();
+						monitorAe.syncPassenger();
+						if(monitorAe.goHome(goingHome)){
+							//monitorAe.awakePassengers();
+							monitorDEP.awakePassengers();
+							if(cFlight == numberFlights - 1) {
+								monitorAl.endOfDay();
+								monitorTTQ.endOfDay();
+							}
+							
 						}
 						end = false;
 						System.out.printf("Passenger:%d leaving airport \n",this.passengerID);
 						//state = PassengerEnum.WAITING_END;
 						break;
-					}
-					default :
-						//System.out.printf("ARRIVAL_TRANSFER_TERMINAL" + "passengerID=%d",this.passengerID);
 						
 				}
 				

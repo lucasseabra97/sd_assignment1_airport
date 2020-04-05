@@ -3,6 +3,7 @@ package shared_regions;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import entities.Passenger;
 import interfaces.IDepartureTerminalTransferQBusDriver;
 import interfaces.IDepartureTerminalTransferQPassenger;
 public class DepartureTerminalTransferQuay implements IDepartureTerminalTransferQBusDriver , IDepartureTerminalTransferQPassenger {
@@ -30,19 +31,24 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     *  Departure Terminal Transfer Quay Integer variable for counting all passengers out the bus
 	*/
     private int counterpassengersOut=0; 
+    /**
+     * General Repository
+     */
 
+    private GeneralRepository rep;
         /**
 	* Departure Terminal Transfer Quay  shared Mem.
 	* 
 	* 
 	*
 	*/
-    public  DepartureTerminalTransferQuay(){
+    public  DepartureTerminalTransferQuay(GeneralRepository rep){
         rl = new ReentrantLock(true);
         waitingRide = rl.newCondition();
         passengersOut = rl.newCondition();
         System.out.println("DEPARTURE TERMINAL RUN");
         this.busArrived = false; 
+        this.rep=rep;
 
     }
     
@@ -57,6 +63,9 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
         //System.out.println("waiting ride");
         rl.lock();
         try{
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passBusRide(passenger.getPassengerID());
+
             //System.out.println("waiting ride");
             nPassengers++;
             while(!busArrived)
@@ -79,6 +88,10 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     public void leaveTheBus(){
         rl.lock();
         try { 
+
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passLeaveBus(passenger.getPassengerID());
+
             nPassengers --;
             counterpassengersOut ++;
             if(nPassengers == 0){
@@ -104,12 +117,13 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     public void parkTheBusAndLetPassOff( int busSize) {
         rl.lock();
         try {
-            
+            rep.driverParkingDepartureTerminal();
             
             System.out.println("Bus parked and let off"+ nPassengers) ;
             busArrived = true; 
             waitingRide.signalAll();
             passengersOut.await();
+            rep.driverDrivingBackward();
             System.out.println("Bus going backward");
         } catch(Exception ex) {}
         finally {

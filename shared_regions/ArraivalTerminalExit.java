@@ -1,7 +1,12 @@
 package shared_regions;
+
 import interfaces.IArraivalTerminalExitPassenger;
+import main.global;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import entities.Passenger;
 
 public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     /**
@@ -22,19 +27,21 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     private int nrPassengers;
     /**
     * Arraival Terminal Exit boolean to check if all can go home
-	*/
-    private boolean goingHome;
+    */
+    private GeneralRepository rep;
+    private boolean goingHome=false;
     /**
 	* Arraival Terminal Exit shared Mem.
 	* 
 	* @param nrPassengers
 	*
 	*/
-    public ArraivalTerminalExit(int nrPassengers) {
+    public ArraivalTerminalExit(int nrPassengers , GeneralRepository rep) {
         rl = new ReentrantLock(true);
         waitingEnd = rl.newCondition();
-        this.nrPassengers = nrPassengers;
-        this.goingHome = false;
+        this.rep=rep;
+        this.nrPassengers = global.NR_PASSENGERS;
+     
     }
 
     /**
@@ -46,6 +53,10 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     public boolean goHome(int npassengers) {
         rl.lock();
         try {
+
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passGoHome(passenger.getPassengerID());
+
             boolean lastone = npassengers+passengers == nrPassengers;
             if(lastone ){
                 goingHome = true;
@@ -88,7 +99,8 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     public int nPassengersDepartureAT(){
         rl.lock();
         try{
-            return passengers;
+            int temp = passengers;
+            return temp;
         }catch(Exception ex){ return passengers;}
         finally{
             rl.unlock();
@@ -102,7 +114,9 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     public void syncPassenger(){
         rl.lock();    
         try{
-            passengers ++;
+            goingHome=false;
+            passengers++;
+            
         }catch(Exception ex){}
         finally{
             rl.unlock();

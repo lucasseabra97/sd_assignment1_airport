@@ -30,8 +30,8 @@ public class BaggageReclaimOffice implements IBaggageReclaimOfficePassenger{
         //rep.missingBags(i, passengerID);
         rl.lock();
         try {
-            //Passenger passenger = this(Passenger);
-            //rep.passComplain(passenger.getPassengerId());
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passComplain(passenger.getPassengerID());
 
             for(Baggage b : bags) {
                 this.bagsList.add(b);

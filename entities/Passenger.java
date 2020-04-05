@@ -80,14 +80,6 @@ public class Passenger extends Thread {
     */
 	private boolean end;
 	/**
-    * Number of Passengers in Arrival terminal Exit
-    */
-	private int npassengersAe;
-	/**
-    * Number of Passengers in Departure Terminal Entrance
-    */
-	private int npassengersDEP;
-	/**
      * Destination of passenger for each flight
      */
     private Boolean[] flightsDestination;
@@ -260,11 +252,11 @@ public class Passenger extends Thread {
 				case ENTERING_THE_DEPARTURE_TERMINAL:
 
 					System.out.printf("Passenger:%d -> PREPARING NEXT FLIGHT \n",this.passengerID);
-					npassengersDEP = monitorDEP.nPassengersDepartureTEntrance();
+					
 					monitorDEP.syncPassenger();
-					if(monitorDEP.prepareNextLeg(npassengersDEP)){
+					int npassengersAE =monitorAe.nPassengersDepartureAT();
+					if(monitorDEP.prepareNextLeg(npassengersAE)){
 						monitorAe.awakePassengers();
-						monitorDEP.awakePassengers();
 						if(cFlight == numberFlights - 1) {
 							monitorAl.endOfDay();
 							monitorTTQ.endOfDay();
@@ -276,10 +268,11 @@ public class Passenger extends Thread {
 					break ;
 				case EXITING_THE_ARRIVAL_TERMINAL:
 					System.out.printf("Passenger:%d -> EXITING_THE_ARRIVAL_TERMINAL \n",this.passengerID);
-					npassengersAe = monitorAe.nPassengersDepartureAT();
+					
 					monitorAe.syncPassenger();
-					if(monitorAe.goHome(npassengersAe)){
-						monitorAe.awakePassengers();
+					int npassengersDEP = monitorDEP.nPassengersDepartureTEntrance();
+					
+					if(monitorAe.goHome(npassengersDEP)){
 						monitorDEP.awakePassengers();
 						if(cFlight == numberFlights - 1) {
 							monitorAl.endOfDay();

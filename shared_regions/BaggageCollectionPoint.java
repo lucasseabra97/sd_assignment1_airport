@@ -4,24 +4,28 @@ import java.util.List;
 import java.util.ArrayList;
 
 import commonInfra.*;
+import entities.Passenger;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 import interfaces.*;
 
+
 import java.util.concurrent.locks.Condition;
+
 
 public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IBaggageCollectionPointPassenger{
     private final ReentrantLock rl;
     private final Condition waitingBag;
     private List<Baggage> bags;
     private Boolean noMoreBags = false;
+    private GeneralRepository rep;
 
-
-    public BaggageCollectionPoint(){
+    public BaggageCollectionPoint(GeneralRepository rep){
         rl = new ReentrantLock(true);
         waitingBag = rl.newCondition();
         bags = new ArrayList<>();
+        this.rep = rep;
       
     }
 
@@ -31,7 +35,7 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
 	public void carryItToAppropriateStore(Baggage bag) {
         rl.lock();
         try{
-            
+                rep.porterMoveBagToConveyorBelt();
                 bags.add(bag);
                 noMoreBags = false;
                 waitingBag.signalAll();
@@ -45,12 +49,14 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
     public Baggage goCollectABag(ArrayList<Baggage> bagp) {
         rl.lock();
         try {
-
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passEnterLuggageCollectionPoint(passenger.getPassengerID());
             System.out.println(bags +"  bomdia "+ bagp);
             while(!noMoreBags){
                 for(int i = 0; i < bags.size(); i++) {
                     Baggage tempbag =bags.get(i);
                     if(bagp.contains(tempbag)){
+                            rep.passCollectBag(passenger.getPassengerID());
                             bags.remove(tempbag);
                         return tempbag;
                     }
@@ -72,6 +78,7 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
     public void noMoreBagsToCollect() {
         rl.lock();
         try {
+            rep.porterNoMoreBags();
             noMoreBags = true;
             waitingBag.signalAll();
         } catch(Exception ex) {} 

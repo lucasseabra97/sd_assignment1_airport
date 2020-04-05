@@ -67,7 +67,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	*  	Arraival Lounge shared Mem.
     * 	@param maxPassengers
     */
-	public ArraivalLounge( List<List<Baggage>> bagsPerFlight) {
+	public ArraivalLounge( List<List<Baggage>> bagsPerFlight , GeneralRepository reo) {
 		//this.maxPassengers = maxPassengers;
 		this.memBag = new ArrayList<Baggage>();
 		rl = new ReentrantLock(true);
@@ -76,6 +76,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 		waitForPlane = rl.newCondition();
 		rand = new Random();
 		this.bagsPerFlight = bagsPerFlight;
+		this.rep = rep;
 		
 	}
 
@@ -94,8 +95,8 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
         rl.lock();
         try {
 
-            // if(goHome) repository.addFinalDestinations();
-            // else repository.addTransit();
+			if(goHome) rep.addFinalDestinations();
+            else rep.addTransit();
 
             while(!porterAvailable)
                 cPorter.await();
@@ -135,7 +136,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
             porterAvailable = true;
             cPorter.signalAll();
 
-            //repository.porterWaitingLanding();
+            rep.porterWaitingLanding();
             while(!collect && !dayEnded) {
 				System.out.println("BOMDIA");
 				waitForPlane.await();
@@ -147,7 +148,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
                 List<Baggage> flightBags = bagsPerFlight.remove(0);
                 for(int b = 0; b < flightBags.size(); b++) {
                     memBag.add(flightBags.get(b));
-                    //repository.addBag();
+                    rep.addBag();
                    
                 }
             }
@@ -169,11 +170,12 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	 */	
 	@Override
 	public Baggage tryToCollectABag(){
-		//rep.porterState(PorterEnum.AT_THE_PLANES_HOLD);
+		
 		rl.lock();
 		try{
 			if(memBag.size() > 0) {
 				Baggage tempbagg = memBag.remove(0);
+				rep.porterCollectBag();
 				//System.out.println(memBag.size());
 				return tempbagg;
 			}

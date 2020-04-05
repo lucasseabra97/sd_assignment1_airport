@@ -3,7 +3,9 @@ package shared_regions;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import entities.Passenger;
 import interfaces.IDepartureTerminalEntrancePassenger;
+import main.global;
 
 public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePassenger{
     /**
@@ -26,7 +28,7 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     * Departure Terminal Entrance boolean to check if all can go home
 	*/
     private boolean goingHome;
-
+    private GeneralRepository rep;
     /**
 	* Departure Terminal Entrance shared Mem.
 	* 
@@ -34,11 +36,12 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
 	*
 	*/
   
-    public DepartureTerminalEntrance(int nrPassengers) {
+    public DepartureTerminalEntrance(int nrPassengers , GeneralRepository rep) {
         rl = new ReentrantLock(true);
         waitingEnd = rl.newCondition();
-        this.nrPassengers = nrPassengers;
+        this.nrPassengers = global.NR_PASSENGERS;
         this.goingHome = false;
+        this.rep = rep;
     }
 
     /**
@@ -49,7 +52,7 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     public void syncPassenger(){
         rl.lock();
         try{
-            
+            goingHome = false;
             passengers ++;
 
         }catch(Exception ex){}
@@ -83,7 +86,8 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     public int nPassengersDepartureTEntrance(){
         rl.lock();
         try {
-            return passengers;
+            int tmp = passengers; 
+            return tmp;
         } catch (Exception e) {  return passengers;      }
         finally{
             rl.unlock();
@@ -99,7 +103,11 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     public boolean prepareNextLeg(int npassengers) {
         rl.lock();
         try {
+
             boolean lastone = npassengers + passengers == nrPassengers -1;
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passPrepareNextLeg(passenger.getPassengerID());
+
             if(lastone){
                 goingHome = true;
                 waitingEnd.signalAll();
@@ -107,7 +115,7 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
             while(!goingHome){
                 waitingEnd.await();
             }
-            npassengers --;
+            passengers --;
             return lastone;
             
         } catch(Exception ex) {return false;}

@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import commonInfra.*;
 import entities.*;
 import interfaces.*;
+import main.global;
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{
     /**
@@ -49,20 +50,27 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     * Arriaval Terminal Transfer Quay  variable to determine if cycle ended
 	*/
     private Boolean endOfDay = false;
-
-     /**
+    /** 
+     * General Repository
+    */
+     private GeneralRepository rep;
+    
+    
+    /**
 	* Arriaval Terminal Transfer Quay shared Mem.
 	* 
 	* @param busSize
 	*
 	*/
-    public ArraivalTerminalTransferQuay(int busSize) {
+    public ArraivalTerminalTransferQuay(int busSize , GeneralRepository rep) {
         rl = new ReentrantLock(true);
-        this.busSize=busSize;
+        this.busSize=global.BUS_SIZE;
         this.waitPlace = rl.newCondition();
         this.waitFull = rl.newCondition();
         this.waitAnnouncment = rl.newCondition();
         this.waitEnterBus = rl.newCondition();
+        this.rep = rep;
+
     }
 
     
@@ -84,6 +92,10 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public void takeABus(int passengerID){
         rl.lock();
         try{
+
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passJoinBusQueue(passenger.getPassengerID());
+
             //before blocking the 3 guy wakes up the BD
             passengers++;
             while(passengersEntering >= busSize) {
@@ -110,6 +122,8 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         rl.lock();
         try{
             passengersInside++;
+            Passenger passenger = (Passenger) Thread.currentThread();
+            rep.passSitInBus(passenger.getPassengerID());
             if (passengersInside == passengersEntering) {
                 waitEnterBus.signalAll();
             }
@@ -128,16 +142,20 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         try {
 
             if(passengers > 0) {
+                
                 waitPlace.signalAll();
+                
             }
             waitFull.await();
             if(passengers >0){
+                rep.driverDrivingForward();
                 return BusDriverAction.goToDepartureTerminal;
             }
             else if(endOfDay){
                 return BusDriverAction.dayEnded;
             }
             else{
+                rep.driverParkingArrivalTerminal();
                 return BusDriverAction.stayParked;
             }
 

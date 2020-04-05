@@ -3,8 +3,16 @@ package entities;
 import interfaces.*;
 import commonInfra.*;
 
+
+ /**
+*  Bus driver entity 
+*  @author João Monteiro 
+*  @author Lucas Seabra
+*/
 public class BusDriver extends Thread{
-    private int numLimitPassenger;
+    /**
+     * BusDriver state
+     */
     private BusDriverEnum state;
     /**
     * Integer   to count time
@@ -32,14 +40,7 @@ public class BusDriver extends Thread{
     */
     private BusDriverAction busState;
    
-
-    /**
-    * 
-    *  Bus driver entity 
-    * 
-    * @author João Monteiro 
-    * @author Lucas Seabra
-    */
+   
     public BusDriver(IArraivalTerminalTransferQBusDriver terminalTQBusDriver,IDepartureTerminalTransferQBusDriver departureTerminalQBusDriver , int busSize){
         this.state = state.PARKING_AT_THE_ARRIVAL_TERMINAL;
         this.busSize = busSize;

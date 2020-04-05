@@ -1,6 +1,6 @@
 package shared_regions;
 
-import java.util.*;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -8,6 +8,14 @@ import commonInfra.*;
 import entities.*;
 import interfaces.*;
 import main.global;
+
+
+/**
+ * Arraival Terminal Transfer Quay shared memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
 
 public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQPassenger,IArraivalTerminalTransferQBusDriver{
     /**
@@ -57,10 +65,10 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     
     
     /**
-	* Arriaval Terminal Transfer Quay shared Mem.
+	* Arriaval Terminal Transfer Quay shared Memomry constructor
 	* 
 	* @param busSize
-	*
+	* @param rep
 	*/
     public ArraivalTerminalTransferQuay(int busSize , GeneralRepository rep) {
         rl = new ReentrantLock(true);

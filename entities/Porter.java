@@ -2,7 +2,11 @@ package entities;
 import commonInfra.*;
 import interfaces.*;
 
-
+/**
+*  Porter entity 
+*  @author João Monteiro 
+*  @author Lucas Seabra
+*/
 public class Porter extends Thread{
     /**
 	* State for Porter
@@ -28,15 +32,7 @@ public class Porter extends Thread{
     * Interface Porter Temporary Storage Area 
     */
     private final ITemporaryStorageAreaPorter monitorTSA;
-
     
-    /**
-    * 
-    *  Porter entity 
-    * 
-    * @author João Monteiro 
-    * @author Lucas Seabra
-    */
     public Porter(IArraivalLoungePorter monitorAl,IBaggageCollectionPointPorter monitorBCP , ITemporaryStorageAreaPorter monitorTSA){
         this.monitorAl = monitorAl;
         this.monitorBCP = monitorBCP;

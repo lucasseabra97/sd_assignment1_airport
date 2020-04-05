@@ -7,6 +7,14 @@ import entities.Passenger;
 import interfaces.IDepartureTerminalEntrancePassenger;
 import main.global;
 
+
+/**
+ * Departure Terminal Entrance shared memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
+
 public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePassenger{
     /**
     * Departure Terminal Entrance Variable for locking 
@@ -28,12 +36,15 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     * Departure Terminal Entrance boolean to check if all can go home
 	*/
     private boolean goingHome;
+    /**
+     * General Repository
+     */
     private GeneralRepository rep;
     /**
-	* Departure Terminal Entrance shared Mem.
+	* Departure Terminal Entrance shared Memory constructor
 	* 
 	* @param nrPassengers
-	*
+	* @param rep
 	*/
   
     public DepartureTerminalEntrance(int nrPassengers , GeneralRepository rep) {

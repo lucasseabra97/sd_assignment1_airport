@@ -12,6 +12,13 @@ import interfaces.*;
 
 import main.global;
 
+/**
+ * Arraival Lounge shared memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
+
 public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoungePorter{
 	/**
     * Arraival Lounge Variable for locking 
@@ -39,35 +46,32 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
     * Arraival Lounge determine maxPassengers for Bus
     */
 	private int maxPassengers;
- 
 	/**
     * Arraival Lounge boolean for end of cycle
     */
 	private boolean dayEnded=false;
-
 	/**
-	 * Arraival Lounge to collect bag
+	 * Arraival Lounge boolean to collect bag
 	 * 
 	 */
 	private boolean collect = false;
 	/**
-	 *  General Information Repository
-	 */
-
+	*  Boolean for porter if should continue to collect bags
+	*/
 	private boolean porterAvailable=false;
-
-	 
+	/**
+	* List of Bags for each flight.
+	*/ 
 	private List<List<Baggage>> bagsPerFlight;
-
 	/**
      * The general repository of information.
      */
-  
 	private final GeneralRepository rep;
-	/**
-    * 
-	*  	Arraival Lounge shared Mem.
-    * 	@param maxPassengers
+
+	/** 
+	* Arraival Lounge shared Memory constructor
+    * @param repository General repository of information
+    * @param bagsPerFlight List of bags for each flight
     */
 	public ArraivalLounge( List<List<Baggage>> bagsPerFlight , GeneralRepository rep) {
 		//this.maxPassengers = maxPassengers;
@@ -85,12 +89,9 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
 	/**
 	 * Returns passenger action in {@link commonInfra.PassengerAction} state. <p/>
 	 * Disembarks passenger and notifies Porter
-	 * @param bags
-	 * @param jorneyEnds
-	 * @return PassengerAction
+	 * @param goHome Passenger situation - True for going home, false otherwise
+	 * 
 	 */
-
-
 	@Override
     public int whatShouldIDO(Boolean goHome) {
         rl.lock();
@@ -174,7 +175,7 @@ public class ArraivalLounge implements IArraivalLoungePassenger , IArraivalLoung
     }
 	/**
 	 * Porter in {@link  commonInfra.PorterEnum.AT_THE_PLANES_HOLDWAITING_FOR_PLANE_TO_LAND} state
-	 * @return bag
+	 * @return baggage
 	 * 
 	 */	
 	@Override

@@ -9,6 +9,13 @@ import commonInfra.*;
 import entities.*;
 import main.global;
 
+/**
+ * General Repository region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
+
 public class GeneralRepository{
     /**
      * File pass as argument 
@@ -18,59 +25,8 @@ public class GeneralRepository{
      * flight luggage
      */
     private int flightLuggage;
-    /**
-     * Flight number
-     */
-    private int fn;
-    /**
-     * Number of pieces of luggage presently at the plane's hold
-     */
-    private int[] bn = {0, 1, 2, 3, 4};
-    /**
-     * State of the porter
-     */
-    private PorterEnum porterState;
-    /**
-     * Number of pieces of luggage presently on the conveyor belt
-     */
-    private int cb;
-    /**
-     * Number of pieces of luggage belonging to passengers in transit presently stored at the storeroom
-     */
-    private int[] sr = {0, 0, 0, 0, 0};
-    /**
-     * State of the driver
-     */
-    private BusDriverEnum bDriverState;
-    /**
-     * Occupation state for the waiting queue (passenger id / - (empty))
-     */
-    private String[] q = {"-", "-", "-", "-", "-", "-"};
-    /**
-     * Occupation state for seat in the bus (passenger id / - (empty))
-     */
-    private String[] s = {"-", "-", "-"};
-    /**
-     * State of passenger # (# - 0 .. 5)
-     */
-    private String[] passengerStates = new String[global.NR_PASSENGERS];
-    /**
-     * Situation of passenger # (# - 0 .. 5) – TRT (in transit) / FDT (has this airport as her  destination)
-     */
-    private String si;
-    /**
-     * Number of pieces of luggage the passenger # (# - 0 .. 5) carried at the start of her journey
-     */
-    private int[] nr = new int[6]; 
-    /**
-     * Number of pieces of luggage the passenger # (# - 0 .. 5) she has presently collected
-     */
-    private int[] na = new int[6];
-    /**
-     * Shows if this airport is  destination of the passenger (TRT - in transit; FDT -  destination);
-     */
-    private String[] passengerDest = new String[6];
-
+   
+    private String[] passengerStates = new String[global.NR_PASSENGERS]; 
     /**
      * Counter for number of passengers with final destination
      */
@@ -131,16 +87,21 @@ public class GeneralRepository{
      */
     private int maxPassengers;
     /**
-     *  reentrant lock
-     */
-    /**
      * add luggage that have been collected by the passenger
      */
     private String[] passengerCollectedLuggage;
+    /**
+     *  reentrant lock
+     */
     private ReentrantLock rl;
     
-    // Abbreviations of the porter and driver states, in order
+    /**
+     * Porter state
+     */
     private String porterStates;
+    /**
+     * BusDriverState
+     */
     private String bDriverStates;
 
 
@@ -454,7 +415,7 @@ public class GeneralRepository{
      * @param state A state from {@link enums.PassengerEnum} .
      * @param bags The amount of bags the passenger owns.
      * @param situation The passenger's situation : either "FDT" (final destination) or "TRF" (in transit).
-     * @param id The passenger's id. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The passenger's id. Ids range from 0 to {@link main.global} .
      */
     public void passengerInit(PassengerEnum state, int bags, String situation ,int id) {
         rl.lock();
@@ -485,7 +446,7 @@ public class GeneralRepository{
 
     /**
      * Removes a bag from the conveyor luggage and adds a bag to the passenger collected luggage.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passCollectBag(int id) {
         rl.lock();
@@ -501,7 +462,7 @@ public class GeneralRepository{
 
     /**
      * Sets the passenger to At the Baggage Reclaim Office (BRO) and adds a bag to the lost bag count.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passComplain(int id) {
         rl.lock();
@@ -517,7 +478,7 @@ public class GeneralRepository{
 
     /**
      * Sets the passenger to At the Arrival Terminal Tranfer (ATT) and adds the passenger to the bus waiting queue.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passJoinBusQueue(int id) {
         rl.lock();
@@ -533,7 +494,7 @@ public class GeneralRepository{
 
     /**
      * Removes the passenger from the bus waiting queue and sits it on the bus.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passSitInBus(int id) {
         rl.lock();
@@ -560,7 +521,7 @@ public class GeneralRepository{
 
     /**
      * Sets the indicated passenger's state to Terminal Tranfer (TRT), only if it isn't already a that state.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passBusRide(int id) {
         rl.lock();
@@ -577,7 +538,7 @@ public class GeneralRepository{
 
     /**
      * Sets the passenger's state to At the Departure Tranfer Terminal (DTT) and removes him from the bus.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passLeaveBus(int id) {
         rl.lock();
@@ -593,7 +554,7 @@ public class GeneralRepository{
 
     /**
      * Sets the indicated passenger's state to Exiting the Arrival Terminal (EAT), only if it isn't already a that state.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passGoHome(int id) {
         rl.lock();
@@ -610,7 +571,7 @@ public class GeneralRepository{
 
     /**
      * Sets the indicated passenger's state to Entering the Departure Terminal (EDT), only if it isn't already a that state.
-     * @param id The id of the passenger to affect. Ids range from 0 to {@link utils.Constants#N()}-1 .
+     * @param id The id of the passenger to affect. Ids range from 0 to {@link main.global}-1 .
      */
     public void passPrepareNextLeg(int id) {
         rl.lock();

@@ -5,18 +5,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
 import main.*;
 import interfaces.*;
+
+/**
+*  Passenger entity 
+*  @author João Monteiro 
+*  @author Lucas Seabra
+*/
 public class Passenger extends Thread {
 	/**
 	* State for Passenger
 	*/
 	private PassengerEnum state;
-	/**
-	* Next action of Passenger
-	*/
-	private PassengerAction action;
 	/**
 	* verifying if passenger has another flight
 	*/
@@ -45,20 +46,10 @@ public class Passenger extends Thread {
     * Interface Passenger Departure Terminal Entrance  
     */
 	private final IDepartureTerminalEntrancePassenger monitorDEP;
-
-	/**
-    * List of Passenger lost bags  
-    */
-	private  ArrayList<Baggage> lostBags;
 	/**
     * Interface Passenger Baggage Reclaim Office 
     */
-
 	private final IBaggageReclaimOfficePassenger monitorBRO;
-	/**
-    * Array of Passenger bags  
-    */
-	private List<Integer> numBags;
 	/**
      * Number of passenger's {@link Bag}s per flight
      */
@@ -72,21 +63,9 @@ public class Passenger extends Thread {
     */
 	private int passengerID;
 	/**
-    * Number of Passenger bags  
-    */
-	private int nbags;
-	 /**
     * Terminate Passenger cicle if yes
     */
 	private boolean end;
-	/**
-    * Number of Passengers in Arrival terminal Exit
-    */
-	private int npassengersAe;
-	/**
-    * Number of Passengers in Departure Terminal Entrance
-    */
-	private int npassengersDEP;
 	/**
      * Destination of passenger for each flight
      */
@@ -95,23 +74,16 @@ public class Passenger extends Thread {
      * Current flight
      */
 	private int cFlight;
-	
-
+	/**
+	 * total number of flights
+	 */
 	private int numberFlights;
     /**
      * Bags of passenger for each flight
      */
     private List<List<Baggage>> flightsBags;
 
-
-
-	/**
-    * 
-    *  Passenger entity 
-    * 
-    * @author João Monteiro 
-    * @author Lucas Seabra
-    */
+	
 	public Passenger(int passengerID, Boolean[] flightsDestination, List<List<Baggage>> flightsBags,IArraivalLoungePassenger monitorAl,IBaggageCollectionPointPassenger monitorBc, IArraivalTerminalExitPassenger monitorAe, IArraivalTerminalTransferQPassenger monitorTTQ , IDepartureTerminalTransferQPassenger monitorDTTQ, IDepartureTerminalEntrancePassenger monitorDEP,IBaggageReclaimOfficePassenger monitorBRO) {
 		this.passengerID = passengerID;
 		//this.numBags = numBags;
@@ -120,7 +92,6 @@ public class Passenger extends Thread {
 		this.monitorBc = monitorBc;
 		this.monitorAl = monitorAl;
 		this.state = PassengerEnum.AT_THE_DISEMBARKING_ZONE;	
-		this.nbags = 0;
 		this.bagsCollected = new ArrayList<Baggage>();
 		this.monitorAe = monitorAe;
 		this.monitorTTQ = monitorTTQ;

@@ -8,6 +8,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import entities.Passenger;
 
+/**
+ * Arraival Terminal shared memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
+
 public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     /**
     * Arraival Terminal Exit Variable for locking 
@@ -26,15 +33,18 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
 	*/
     private int nrPassengers;
     /**
+     * General Repository
+     */
+    private GeneralRepository rep;
+    /**
     * Arraival Terminal Exit boolean to check if all can go home
     */
-    private GeneralRepository rep;
     private boolean goingHome=false;
     /**
-	* Arraival Terminal Exit shared Mem.
+	* Arraival Terminal Exit shared Memory constructor
 	* 
 	* @param nrPassengers
-	*
+	* @param rep
 	*/
     public ArraivalTerminalExit(int nrPassengers , GeneralRepository rep) {
         rl = new ReentrantLock(true);

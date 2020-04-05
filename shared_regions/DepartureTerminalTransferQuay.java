@@ -6,6 +6,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import entities.Passenger;
 import interfaces.IDepartureTerminalTransferQBusDriver;
 import interfaces.IDepartureTerminalTransferQPassenger;
+
+
+
+/**
+ * Departure Terminal Transfer Quay memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
 public class DepartureTerminalTransferQuay implements IDepartureTerminalTransferQBusDriver , IDepartureTerminalTransferQPassenger {
     /**
     * Departure Terminal Transfer Quay for locking 
@@ -36,11 +45,9 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
      */
 
     private GeneralRepository rep;
-        /**
-	* Departure Terminal Transfer Quay  shared Mem.
-	* 
-	* 
-	*
+    /**
+	* Departure Terminal Transfer Quay  shared Memory constructor 
+	* @param rep
 	*/
     public  DepartureTerminalTransferQuay(GeneralRepository rep){
         rl = new ReentrantLock(true);

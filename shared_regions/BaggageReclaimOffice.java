@@ -7,12 +7,30 @@ import java.util.concurrent.locks.ReentrantLock;
 import commonInfra.*;
 import entities.Passenger;
 import interfaces.IBaggageReclaimOfficePassenger;
+
+/**
+ * Baggage Reclaim Office shared memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
 public class BaggageReclaimOffice implements IBaggageReclaimOfficePassenger{
-
+    /**
+     * Baggage Reclaim Office variable for locking
+     */
     private final ReentrantLock rl;
+    /**
+     * List of bags that where missed
+     */
     private List<Baggage> bagsList;
+    /**
+     * General Repository
+     */
     private GeneralRepository rep;
-
+    /**
+     * Baggage Reclaim Office constructor
+     * @param rep
+     */
     public BaggageReclaimOffice(GeneralRepository rep){
         this.rep = rep;
         rl = new ReentrantLock(true);
@@ -21,13 +39,11 @@ public class BaggageReclaimOffice implements IBaggageReclaimOfficePassenger{
     }
 
     /**
-     *  report baggages missing
-     * @param i
-     * @param passengerID
+     * Makes a complaint.
+     * @param bags Set of bags lost.
      */
     public void complain(ArrayList<Baggage> bags) {
-        //rep.passengerState(passengerID, PassengerEnum.AT_THE_BAGGAGE_RECLAIM_OFFICE);
-        //rep.missingBags(i, passengerID);
+      
         rl.lock();
         try {
             Passenger passenger = (Passenger) Thread.currentThread();

@@ -12,15 +12,39 @@ import interfaces.*;
 
 
 import java.util.concurrent.locks.Condition;
-
+/**
+ * Baggage Collection Point shared memory region.
+ * 
+ * @author Lucas Seabra
+ * @author Joao Monteiro
+ */
 
 public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IBaggageCollectionPointPassenger{
+    /**
+    * Baggage Collection Point for locking
+    */
     private final ReentrantLock rl;
+    /**
+    * Condition variable for passengers until the porter places a bag in the belt or there are no more bags to collect
+    */
     private final Condition waitingBag;
+    /**
+    * List of bags
+    */
     private List<Baggage> bags;
+    /**
+    * Boolean variavle to check if there is bags to collect
+    */
     private Boolean noMoreBags = false;
+    /**
+    * General Repository
+    */
     private GeneralRepository rep;
-
+   
+    /**
+    * Baggage Collection Point shared memory constructor
+    * @param rep
+    */
     public BaggageCollectionPoint(GeneralRepository rep){
         rl = new ReentrantLock(true);
         waitingBag = rl.newCondition();
@@ -29,8 +53,10 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
       
     }
 
-    //para sinalizar os passageiros que ja nao ha malas, ou para irem ver 
-    //se a mala que ele acabou de por e deles
+  
+    /**
+     * Porter carries a bag to the collection point. Wakes up passengers waiting for bags.
+     */
     @Override
 	public void carryItToAppropriateStore(Baggage bag) {
         rl.lock();
@@ -45,13 +71,19 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
             rl.unlock();
         }
     }
+    /**
+     * Passenger collects a bag from the baggage collection point.
+     * Passengers wait until there are bags in the collection point. 
+     * They area waken up by the porter, when he puts a bag in the collection point or when there are no more bags.
+     * @param passengerBags The bags the passenger owns.
+     */
     @Override
     public Baggage goCollectABag(ArrayList<Baggage> bagp) {
         rl.lock();
         try {
             Passenger passenger = (Passenger) Thread.currentThread();
             rep.passEnterLuggageCollectionPoint(passenger.getPassengerID());
-            System.out.println(bags +"  bomdia "+ bagp);
+            //System.out.println(bags +"  bomdia "+ bagp);
 
             //System.out.println(bags +"  bomdia "+ bagp);
             while(!noMoreBags){
@@ -76,6 +108,10 @@ public class BaggageCollectionPoint implements IBaggageCollectionPointPorter, IB
         }
     }
 
+
+    /**
+     * Wakes passengers that are waiting for bags, when there are no more bags.
+     */
     @Override
     public void noMoreBagsToCollect() {
         rl.lock();

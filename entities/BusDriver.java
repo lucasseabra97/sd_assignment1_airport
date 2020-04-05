@@ -74,18 +74,18 @@ public class BusDriver extends Thread{
                     }
                     break;
                 case DRIVING_FORWARD:
-                    System.out.println("BUSDRIVER driving Forward");
+                    System.out.println("BusDriver -> DRIVING_FORWARD");
                     state = BusDriverEnum.PARKING_AT_THE_DEPARTURE_TERMINAL;
                     break;
                 case PARKING_AT_THE_DEPARTURE_TERMINAL:
-                    System.out.println("BUS DRIVER AT THE DEPARTURE TERMINAL");
+                    System.out.println("BusDriver -> PARKING_AT_THE_DEPARTURE_TERMINAL");
                     departureTerminalQBusDriver.parkTheBusAndLetPassOff(busSize);
-                    System.out.println("PASSAGEIROS SAIRAM DO AUTOCARRO, A COMEÇAR VIAGEM DE VOLTA");
+                    System.out.println("Passengers left the bus | starting travel back");
                     state = BusDriverEnum.DRIVING_BACKWARD;
                     break;
             
                 case DRIVING_BACKWARD:
-                    System.out.println("BUS DRIVER GOING BACKWARD");
+                    System.out.println("BusDriver -> DRIVING_BACKWARD");
                     state = BusDriverEnum.PARKING_AT_THE_ARRIVAL_TERMINAL;
                     break;
 

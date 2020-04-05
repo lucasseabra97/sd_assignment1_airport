@@ -40,8 +40,9 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
         rl = new ReentrantLock(true);
         waitingEnd = rl.newCondition();
         this.rep=rep;
+      
         this.nrPassengers = global.NR_PASSENGERS;
-     
+        this.goingHome = false;
     }
 
     /**

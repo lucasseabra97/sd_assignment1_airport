@@ -4,6 +4,6 @@ import commonInfra.*;
 
 public interface IArraivalTerminalTransferQBusDriver{
     
-    boolean annoucingBusBoarding();
+    int annoucingBusBoarding();
     BusDriverAction hasDaysWorkEnded();
 }

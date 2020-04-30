@@ -1,6 +1,7 @@
 package shared_regions;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,7 +26,7 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     /**
     * Arriaval Terminal Transfer Quay  Conditional variable for Passengers to wait for bus signal
 	*/
-    private final Condition waitPlace;
+    //private final Condition waitPlace;
     /**
     * Arriaval Terminal Transfer Quay  Conditional variable to  signal BusDriver its full 
 	*/
@@ -45,11 +46,11 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     /**
     * Arriaval Terminal Transfer Quay variable to count all passengers
 	*/
-    private int passengers = 0;
+   // private int passengers = 0;
       /**
     * Arriaval Terminal Transfer Quay  variable to count passengers In the bus
 	*/
-    private int passengersInside = 0;
+    //private int passengersInside = 0;
     /**
     * Arriaval Terminal Transfer Quay  variable to count passengers entering
     */
@@ -58,6 +59,25 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     * Arriaval Terminal Transfer Quay  variable to determine if cycle ended
 	*/
     private Boolean endOfDay = false;
+    /**
+     * List of passengers in the waiting line.
+     */
+    private List<Integer> passengerQueue;
+    
+    /**
+     * Lis tof passengers inside the bus.
+     */
+    private List<Integer> insidePassengers;
+    
+    /**
+     * Indication that the bus is ready to travel.
+     */
+    private Boolean busTravelling;
+    
+    
+    
+    
+    
     /** 
      * General Repository
     */
@@ -70,13 +90,19 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
 	* @param busSize
 	* @param rep
 	*/
-    public ArraivalTerminalTransferQuay(int busSize , GeneralRepository rep) {
+    public ArraivalTerminalTransferQuay(GeneralRepository rep) {
         rl = new ReentrantLock(true);
         this.busSize=global.BUS_SIZE;
-        this.waitPlace = rl.newCondition();
+        //this.waitPlace = rl.newCondition();
         this.waitFull = rl.newCondition();
         this.waitAnnouncment = rl.newCondition();
         this.waitEnterBus = rl.newCondition();
+        
+        passengerQueue = new ArrayList<>();
+        insidePassengers = new ArrayList<>();
+        busTravelling = false;
+        
+        
         this.rep = rep;
 
     }
@@ -100,20 +126,20 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public void takeABus(int passengerID){
         rl.lock();
         try{
+            passengerQueue.add(passengerID);
 
             Passenger passenger = (Passenger) Thread.currentThread();
             rep.passJoinBusQueue(passenger.getPassengerID());
 
             //before blocking the 3 guy wakes up the BD
-            passengers++;
-            while(passengersEntering >= busSize) {
-                waitPlace.await();
-            }
-            passengersEntering++;
-            if (passengersEntering == busSize) {
+            if(passengerQueue.size() == busSize)
                 waitFull.signal();
-            }
-            waitAnnouncment.await();
+
+            while((busTravelling && passengerQueue.contains(passengerID)) || passengerQueue.contains(passengerID))
+                waitAnnouncment.await();
+            
+            if(passengerQueue.size() == busSize)
+                waitFull.signal();
 
         }catch(Exception ex){}
         finally {
@@ -129,10 +155,12 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     public void enterTheBus(int passengerID){
         rl.lock();
         try{
-            passengersInside++;
+            insidePassengers.add(passengerID);
+
             Passenger passenger = (Passenger) Thread.currentThread();
             rep.passSitInBus(passenger.getPassengerID());
-            if (passengersInside == passengersEntering) {
+            
+            if (insidePassengers.size() == passengersEntering) {
                 waitEnterBus.signalAll();
             }
         }catch(Exception ex){}
@@ -149,23 +177,22 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
         rl.lock();
         try {
 
-            if(passengers > 0) {
-                
-                waitPlace.signalAll();
-                
+            int count = 0;
+            busTravelling = false;
+
+            rep.driverParkingArrivalTerminal();
+
+            if(passengerQueue.size() > 0) {
+                waitAnnouncment.signalAll();
+            } 
+
+            while(passengerQueue.size() != busSize && !endOfDay) {
+                waitFull.awaitNanos(10 * 1000000);
+                count++;
+                if(count > 10 && passengerQueue.size() > 0)
+                    break;
             }
-            waitFull.await();
-            if(passengers >0){
-                rep.driverDrivingForward();
-                return BusDriverAction.goToDepartureTerminal;
-            }
-            else if(endOfDay){
-                return BusDriverAction.dayEnded;
-            }
-            else{
-                rep.driverParkingArrivalTerminal();
-                return BusDriverAction.stayParked;
-            }
+            return endOfDay ? BusDriverAction.dayEnded : BusDriverAction.goToDepartureTerminal;
 
         } catch (Exception e) {return BusDriverAction.stayParked;}
         finally{
@@ -179,19 +206,34 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
 	*  @return BusdriverAction
     */
     @Override
-    public boolean annoucingBusBoarding() {
+    public int annoucingBusBoarding() {
 		rl.lock();
-		try {
+		try {  
+            
+            busTravelling = true;
+            
+            passengersEntering = passengerQueue.size() > busSize ? busSize : passengerQueue.size();
+            
+            insidePassengers.clear();
+            
             System.out.println("A ANUNCIAR PARTIDA");
-			waitAnnouncment.signalAll();
-			waitEnterBus.await();
-            passengers = passengers - passengersEntering;
-            passengersEntering = 0;
-            passengersInside = 0;
-            return true;
+            for(int i = 0; i < busSize && passengerQueue.size() > 0; i++) {
+                passengerQueue.remove(0);
+                waitAnnouncment.signal();
+            }
+            while(insidePassengers.size() != passengersEntering) {
+                waitEnterBus.await();
+            }
+
+            if(insidePassengers.size() > 0)
+                rep.driverDrivingForward();
+
+            return insidePassengers.size();
+
 
 		} catch (Exception ex) {
-			return true;
+			System.out.println(ex);
+            return 0;
 		} finally {
 			rl.unlock();
 		}
@@ -199,16 +241,11 @@ public class ArraivalTerminalTransferQuay implements IArraivalTerminalTransferQP
     
 
     @Override
-    public Boolean endOfDay() {
+    public void endOfDay() {
         rl.lock();
-        try {
-            endOfDay = true;
-            waitFull.signal();
-            return passengers == 0;
-        } catch(Exception ex) {
-            return true;
-        } finally {
-            rl.unlock();
-        }
+        endOfDay = true;
+        waitFull.signal();
+        rl.unlock();
+        
     }
 }

@@ -69,7 +69,7 @@ public class AirportRhapsody {
         /**
          * {@link shared_regions.ArraivalTerminalTransferQuay}
          */
-        ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(global.BUS_SIZE,genInfoRepo);
+        ArraivalTerminalTransferQuay arraivalTerminalTransferQuay = new ArraivalTerminalTransferQuay(genInfoRepo);
         // Initialize shared region DepartureTerminalTransferQuay
         /**
          * {@link shared_regions.DepartureTerminalTransferQuay}
@@ -101,8 +101,8 @@ public class AirportRhapsody {
         /**
          * {@link entities.Time}
          */
-        Time time = new Time(arraivalTerminalTransferQuay, arraivalLounge);
-        time.start();
+        // Time time = new Time(arraivalTerminalTransferQuay, arraivalLounge);
+        // time.start();
 
         
 
@@ -153,7 +153,7 @@ public class AirportRhapsody {
         try {
             porter.join();
             busdriver.join();
-            time.join();
+            //time.join();
             for (int i = 0; i < global.NR_PASSENGERS; i++) {
                 passengers[i].join();
             }

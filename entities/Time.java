@@ -15,32 +15,32 @@ public class Time extends Thread {
         this.arrivalLounge = arrivalLounge;
     }
     
-    @Override
-    public void run() {
+    // @Override
+    // public void run() {
         
-        while (true) {
+    //     while (true) {
 
-            try {
-                /* System.out.println("TEMPO -> " + time); */
-                Thread.sleep(50);
-                time += 50;
+    //         try {
+    //             /* System.out.println("TEMPO -> " + time); */
+    //             Thread.sleep(50);
+    //             time += 50;
 
-                if(time % 500 == 0) {
-                    arrivalTerminalTransferQuay.departureTime();
-                }
+    //             if(time % 500 == 0) {
+    //                 arrivalTerminalTransferQuay.departureTime();
+    //             }
 
-                if(time % 2400 == 0) {
-                    if(arrivalTerminalTransferQuay.endOfDay()) {
-                        arrivalLounge.endOfDay();
-                        break;
-                    }
-                }
+    //             if(time % 2400 == 0) {
+    //                 if(arrivalTerminalTransferQuay.endOfDay()) {
+    //                     arrivalLounge.endOfDay();
+    //                     break;
+    //                 }
+    //             }
 
-            } catch (Exception e) {}
+    //         } catch (Exception e) {}
 
-        }
+    //     }
         
-    }
+    // }
     
     
 }

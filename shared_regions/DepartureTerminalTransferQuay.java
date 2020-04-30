@@ -31,7 +31,7 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
     /**
     *  Departure Terminal Transfer Quay boolean variable for waiting while bus has not arrived
 	*/
-    private boolean busArrived ;
+    private boolean inMovement = true;
         /**
     *  Departure Terminal Transfer Quay Conditional variable for waiting while bus has not arrived
 	*/
@@ -39,7 +39,7 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
      /**
     *  Departure Terminal Transfer Quay Integer variable for counting all passengers out the bus
 	*/
-    private int counterpassengersOut=0; 
+    private int passengersLeaving; 
     /**
      * General Repository
      */
@@ -53,8 +53,6 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
         rl = new ReentrantLock(true);
         waitingRide = rl.newCondition();
         passengersOut = rl.newCondition();
-        System.out.println("DEPARTURE TERMINAL RUN");
-        this.busArrived = false; 
         this.rep=rep;
 
     }
@@ -74,12 +72,10 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
             rep.passBusRide(passenger.getPassengerID());
 
             //System.out.println("waiting ride");
-            nPassengers++;
-            while(!busArrived)
+            while(inMovement == true){
                 waitingRide.await();
-           
+            }
             
-
         }catch(Exception e){}
         finally{
             rl.unlock();
@@ -99,13 +95,10 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
             Passenger passenger = (Passenger) Thread.currentThread();
             rep.passLeaveBus(passenger.getPassengerID());
 
-            nPassengers --;
-            counterpassengersOut ++;
-            if(nPassengers == 0){
+            nPassengers ++;
+            if(nPassengers == passengersLeaving){
                 passengersOut.signal();
-                System.out.println("Wake up bus to go backward");
-            }
-                
+            }   
 
         } catch (Exception e) {}
     
@@ -121,17 +114,21 @@ public class DepartureTerminalTransferQuay implements IDepartureTerminalTransfer
 	 * 
 	 */
     @Override
-    public void parkTheBusAndLetPassOff( int busSize) {
+    public void parkTheBusAndLetPassOff( int passengersLeaving) {
         rl.lock();
         try {
             rep.driverParkingDepartureTerminal();
             
-            System.out.println("Bus parked and let off"+ nPassengers) ;
-            busArrived = true; 
+            inMovement = false;
+            this.passengersLeaving = passengersLeaving;
             waitingRide.signalAll();
-            passengersOut.await();
+            
+            while(nPassengers != passengersLeaving){
+                passengersOut.await();
+            }
+            nPassengers = 0;
+            inMovement = true;
             rep.driverDrivingBackward();
-            System.out.println("Bus going backward");
         } catch(Exception ex) {}
         finally {
             rl.unlock();

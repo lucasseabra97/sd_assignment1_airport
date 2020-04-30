@@ -39,7 +39,7 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     /**
     * Arraival Terminal Exit boolean to check if all can go home
     */
-    private boolean goingHome=false;
+    private boolean goingHome=true;
     /**
 	* Arraival Terminal Exit shared Memory constructor
 	* 
@@ -52,7 +52,7 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
         this.rep=rep;
       
         this.nrPassengers = global.NR_PASSENGERS;
-        this.goingHome = false;
+  
     }
 
     /**
@@ -68,18 +68,21 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
             Passenger passenger = (Passenger) Thread.currentThread();
             rep.passGoHome(passenger.getPassengerID());
 
-            boolean lastone = npassengers+passengers == nrPassengers;
-            if(lastone ){
-                goingHome = true;
+            boolean lastPassenger = passengers + npassengers == nrPassengers;
+            System.out.println("->" + lastPassenger);
+            if(lastPassenger) {
+                goingHome = false;
                 waitingEnd.signalAll();
             }
-            while(!goingHome){
-                waitingEnd.await();
-            
-            }
-            passengers--;
 
-            return lastone;
+            while(goingHome) {
+                waitingEnd.await();
+            }
+
+            passengers--;
+            
+            return lastPassenger;
+
         } catch(Exception ex) {return false;}
         finally {
             rl.unlock();
@@ -93,7 +96,7 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     public void awakePassengers(){
         rl.lock();
         try {
-            goingHome = true;
+            goingHome = false;
             waitingEnd.signalAll();
             
         } catch (Exception e) {}
@@ -109,13 +112,9 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     @Override
     public int nPassengersDepartureAT(){
         rl.lock();
-        try{
-            int temp = passengers;
-            return temp;
-        }catch(Exception ex){ return passengers;}
-        finally{
-            rl.unlock();
-        }
+        int p = this.passengers;
+        rl.unlock();
+        return p;
     /**
 	*  Increments passengers at Arraival Terminal Exit
 	*  
@@ -123,16 +122,10 @@ public class ArraivalTerminalExit implements IArraivalTerminalExitPassenger{
     }
     @Override
     public void syncPassenger(){
-        rl.lock();    
-        try{
-            goingHome=false;
-            passengers++;
-            
-        }catch(Exception ex){}
-        finally{
-            rl.unlock();
-        }
-   
+        rl.lock();
+        goingHome = true;
+        passengers++;
+        rl.unlock();
     }
    
 

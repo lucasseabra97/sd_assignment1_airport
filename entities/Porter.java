@@ -1,4 +1,7 @@
 package entities;
+
+import java.util.Random;
+
 import commonInfra.*;
 import interfaces.*;
 
@@ -12,6 +15,10 @@ public class Porter extends Thread{
 	* State for Porter
     */
     private PorterEnum state;
+    /**
+    * Random delay to use in thread
+    */
+    private Random rDelay;
 	/**
 	* Next action of Porter
 	*/
@@ -86,7 +93,8 @@ public class Porter extends Thread{
 
             }
             try {
-                Thread.sleep(50);
+                //Thread.sleep(50);
+                Thread.sleep(rDelay.nextInt(10));
             } catch (Exception e) {}
         }
         System.out.println("Porter Ended . ");

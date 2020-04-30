@@ -1,6 +1,9 @@
 package entities;
 
 import interfaces.*;
+
+import java.util.Random;
+
 import commonInfra.*;
 
 
@@ -18,6 +21,15 @@ public class BusDriver extends Thread{
     * Integer   to count time
     */
     private int time = 0; 
+    /**
+    * Random delay to use in thread
+    */
+    private Random rDelay;
+
+     /**
+     * Number of passenger riding the bus
+     */
+    private int passengersRiding = 0;
     /**
      * Interface Busdriver Arraival Terminal Transfer Quay
      */
@@ -55,21 +67,18 @@ public class BusDriver extends Thread{
         while(end){
             switch(state){
                 case PARKING_AT_THE_ARRIVAL_TERMINAL: 
+                    System.out.println("BusDriver waiting for passengers...");
                     busState = terminalTQBusDriver.hasDaysWorkEnded();  
-                    if(busState == BusDriverAction.stayParked)
-                    {
-                        System.out.println("Bus driver parked");
-                        state = BusDriverEnum.PARKING_AT_THE_ARRIVAL_TERMINAL;    
-                    }
-                    else if (busState == BusDriverAction.goToDepartureTerminal){
-                        System.out.println("Starting jouney to terminal Transfer");
-                        terminalTQBusDriver.annoucingBusBoarding();
-                        state = BusDriverEnum.DRIVING_FORWARD;
-                        
+                    if (busState == BusDriverAction.goToDepartureTerminal){
+                       
+                        passengersRiding = terminalTQBusDriver.annoucingBusBoarding();
+                        if(passengersRiding >0){
+                            System.out.println("Starting jouney to terminal Transfer");
+                            state = BusDriverEnum.DRIVING_FORWARD;
+                        }
                     }    
-                   
                     else if (busState == BusDriverAction.dayEnded){
-                        System.out.println("Day ended");
+                        System.out.println("BusDriver's day ended. ");
                         end = false;
                            
                     }
@@ -80,7 +89,7 @@ public class BusDriver extends Thread{
                     break;
                 case PARKING_AT_THE_DEPARTURE_TERMINAL:
                     System.out.println("BusDriver -> PARKING_AT_THE_DEPARTURE_TERMINAL");
-                    departureTerminalQBusDriver.parkTheBusAndLetPassOff(busSize);
+                    departureTerminalQBusDriver.parkTheBusAndLetPassOff(passengersRiding);
                     System.out.println("Passengers left the bus | starting travel back");
                     state = BusDriverEnum.DRIVING_BACKWARD;
                     break;
@@ -93,11 +102,12 @@ public class BusDriver extends Thread{
             }
 
             try {
-                Thread.sleep(50);
-                time +=250;
+                Thread.sleep(rDelay.nextInt(10));
+                //Thread.sleep(50);
+               // time +=250;
             } catch (Exception e) {}
         }
-        System.out.println("Bus driver Ended");
+        System.out.println("Bus driver thread Ended");
     }
 }
 

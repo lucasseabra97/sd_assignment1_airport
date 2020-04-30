@@ -35,7 +35,7 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     /**
     * Departure Terminal Entrance boolean to check if all can go home
 	*/
-    private boolean goingHome;
+    private boolean goingHome =true;
     /**
      * General Repository
      */
@@ -51,7 +51,6 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
         rl = new ReentrantLock(true);
         waitingEnd = rl.newCondition();
         this.nrPassengers = global.NR_PASSENGERS;
-        this.goingHome = false;
         this.rep = rep;
     }
 
@@ -62,15 +61,9 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     @Override 
     public void syncPassenger(){
         rl.lock();
-        try{
-            goingHome = false;
-            passengers ++;
-
-        }catch(Exception ex){}
-        finally{
-            rl.unlock();
-        }
-       
+        goingHome = true;
+        passengers++;
+        rl.unlock(); 
         
     }
      /**
@@ -80,13 +73,9 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     @Override
     public void awakePassengers(){
         rl.lock();
-        try {
-            goingHome = true;
-            waitingEnd.signalAll();
-        } catch (Exception e) {}
-        finally{
-            rl.unlock();
-        }
+        goingHome = false;
+        waitingEnd.signalAll();
+        rl.unlock();
     }
 
     /**
@@ -96,13 +85,9 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
     @Override
     public int nPassengersDepartureTEntrance(){
         rl.lock();
-        try {
-            int tmp = passengers; 
-            return tmp;
-        } catch (Exception e) {  return passengers;      }
-        finally{
-            rl.unlock();
-        }
+        int passengers = this.passengers;
+        rl.unlock();
+        return passengers;
         
     }
     /**
@@ -115,21 +100,28 @@ public class DepartureTerminalEntrance implements IDepartureTerminalEntrancePass
         rl.lock();
         try {
 
-            boolean lastone = npassengers + passengers == nrPassengers -1;
+
+            boolean lastPassenger = npassengers + passengers == nrPassengers;
+
             Passenger passenger = (Passenger) Thread.currentThread();
             rep.passPrepareNextLeg(passenger.getPassengerID());
-
-            if(lastone){
-                goingHome = true;
+            System.out.println("-> "+ lastPassenger);
+            if(lastPassenger) {
+                goingHome = false;
                 waitingEnd.signalAll();
             }
-            while(!goingHome){
+
+            while(goingHome) {
                 waitingEnd.await();
             }
-            passengers --;
-            return lastone;
-            
-        } catch(Exception ex) {return false;}
+
+            passengers--;
+
+            return lastPassenger;
+
+        } catch(Exception ex) {
+            return false;
+        }
         finally {
             rl.unlock();
         }
